@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+
+# Mot de passe / hash admin : jamais sur un repo public
+admin/config.php

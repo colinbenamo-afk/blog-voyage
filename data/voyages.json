@@ -1,0 +1,122 @@
+[
+  {
+    "id": "caraibes",
+    "pays": "Caraïbes",
+    "ordre_depart": "À COMPLÉTER",
+    "duree": "3 moins et demie",
+    "transport": "voilier",
+    "coordonnees": {
+      "lat": 16.265,
+      "lon": -61.551
+    },
+    "photos": [
+      "assets/images/caraibes-1.webp",
+      "assets/images/caraibes-2.webp",
+      "assets/images/caraibes-3.webp"
+    ],
+    "sections": [
+      {
+        "titre": "Caraïbes",
+        "texte": "3 moins et demie sur Gypsy Soul, depuis les Bahames jusqu'en Martinique!"
+      },
+      {
+        "titre": "Vie de village",
+        "texte": "Entre les cocotiers, les maisons colorées racontent une autre histoire : celle d'une culture métissée, faite de musique, d'épices et d'un accueil désarmant de simplicité."
+      },
+      {
+        "titre": "Coucher de soleil",
+        "texte": "Chaque soir, le ciel s'embrase au-dessus de la mer des Caraïbes. Un rituel immuable qui rassemble locaux et voyageurs sur la même plage, sans un mot."
+      }
+    ]
+  },
+  {
+    "id": "indonesie",
+    "pays": "Indonésie",
+    "ordre_depart": "À COMPLÉTER",
+    "duree": "À COMPLÉTER",
+    "transport": "À COMPLÉTER",
+    "coordonnees": {
+      "lat": -8.5069,
+      "lon": 115.2625
+    },
+    "photos": [
+      "assets/images/indonesie-1.webp",
+      "assets/images/indonesie-2.webp",
+      "assets/images/indonesie-3.webp"
+    ],
+    "sections": [
+      {
+        "titre": "Indonésie",
+        "texte": "Un archipel de plus de dix-sept mille îles où chaque traversée en bateau dévoile un paysage différent : rizières en terrasses, volcans fumants, fonds marins spectaculaires."
+      },
+      {
+        "titre": "Rizières de Bali",
+        "texte": "À Ubud, les rizières en escalier dessinent des vagues de vert. Le matin, la brume s'accroche encore aux collines pendant que les fermiers commencent leur journée."
+      },
+      {
+        "titre": "Temples et volcans",
+        "texte": "Au lever du jour, le sommet du Bromo perce la mer de nuages. Un silence minéral, seulement troublé par le souffle du volcan encore actif."
+      }
+    ]
+  },
+  {
+    "id": "sri-lanka",
+    "pays": "Sri Lanka",
+    "ordre_depart": "À COMPLÉTER",
+    "duree": "À COMPLÉTER",
+    "transport": "À COMPLÉTER",
+    "coordonnees": {
+      "lat": 7.2906,
+      "lon": 80.6337
+    },
+    "photos": [
+      "assets/images/sri-lanka-1.webp",
+      "assets/images/sri-lanka-2.webp",
+      "assets/images/sri-lanka-3.webp"
+    ],
+    "sections": [
+      {
+        "titre": "Sri Lanka",
+        "texte": "Dernière étape du voyage : une île dense où jungle, plantations de thé et plages désertes se succèdent en quelques heures de train seulement."
+      },
+      {
+        "titre": "Train des hauteurs",
+        "texte": "Le trajet entre Kandy et Ella, portes ouvertes, jambes dans le vide, reste le plus beau souvenir de train du voyage. Le vert des plantations défile à perte de vue."
+      },
+      {
+        "titre": "Retour vers l'océan",
+        "texte": "Sur la côte sud, les pêcheurs sur échasses ferment la boucle du voyage. Une image simple, presque immobile, pour conclure trois destinations si différentes."
+      }
+    ]
+  },
+  {
+    "id": "italie",
+    "pays": "Italie",
+    "ordre_depart": "2026-06-12",
+    "duree": "3 jours",
+    "transport": "van",
+    "coordonnees": {
+      "lat": 44.3593,
+      "lon": 8.5753
+    },
+    "photos": [
+      "assets/images/italie-1.webp",
+      "assets/images/italie-2.webp",
+      "assets/images/italie-3.webp"
+    ],
+    "sections": [
+      {
+        "titre": "Italie",
+        "texte": "Départ le 12 juin 2026, 3 jours, en van."
+      },
+      {
+        "titre": "Surf",
+        "texte": "Surfer des super vagues le soir sous la pluie"
+      },
+      {
+        "titre": "Skate",
+        "texte": "Faire du skate dans un skate park au bord de l'eau"
+      }
+    ]
+  }
+]

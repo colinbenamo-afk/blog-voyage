@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Blog de Voyage</title>
+
+  <!-- Polices : Expose (titres) + Bespoke Sans (texte) via Fontshare,
+       Space Mono (coordonnées) via Google Fonts -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=bespoke-sans@400,500,700&f[]=expose@400,700&display=swap" rel="stylesheet">
+  <!-- Leaflet : carte interactive utilisée en fond du hero -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+<body>
+
+  <!-- ============================================ -->
+  <!-- HEADER : barre de navigation fixe             -->
+  <!-- ============================================ -->
+  <header class="site-header">
+    <img src="assets/logo.png" alt="Logo du blog de voyage" class="site-header-logo-img">
+    <!-- Liens générés dynamiquement par script.js depuis data/voyages.json -->
+    <nav class="site-header-nav"></nav>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- HERO : section plein écran d'introduction     -->
+  <!-- ============================================ -->
+  <section class="hero">
+
+    <!-- Carte du monde stylisée générée en JS (grille de points formant les continents) -->
+    <div class="hero-map" id="hero-map" aria-hidden="true"></div>
+
+    <!-- Voile sombre + dégradé pour assurer la lisibilité du titre -->
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <h1 class="hero-title">Découvre mes voyages</h1>
+      <p class="hero-subtitle">Colin Benamo</p>
+    </div>
+
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTIONS DESTINATIONS                         -->
+  <!-- Générées dynamiquement par script.js depuis data/voyages.json -->
+  <!-- Chaque section = 1 colonne photo "sticky"     -->
+  <!-- + 1 colonne de texte qui défile (Scrollama)   -->
+  <!-- ============================================ -->
+  <main></main>
+
+  <footer class="site-footer">
+    <p>Merci d'avoir parcouru mon blog de voyage !</p>
+    <a href="admin/admin.php" class="admin-link">Accès admin</a>
+  </footer>
+
+  <!-- Leaflet + Scrollama.js via CDN -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/scrollama@3.2.0/build/scrollama.min.js"></script>
+  <script src="script.js"></script>
+  
+</body>
+</html>
