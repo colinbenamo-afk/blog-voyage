@@ -1,6 +1,6 @@
 # Page admin (ajout de voyages)
 
-> À mettre à jour à chaque modification de cette section. Pour tout ce qui concerne la **sécurité** de cette page (mots de passe, connexion), voir `admin/SECURITE.md` en détail — ce fichier-ci reste focalisé sur le fonctionnement de l'outil.
+> À mettre à jour à chaque modification de cette section. Pour tout ce qui concerne la **sécurité** de cette page (mots de passe, connexion), voir `docs/securite.md` en détail — ce fichier-ci reste focalisé sur le fonctionnement de l'outil.
 
 ## Fichiers concernés
 
@@ -8,7 +8,7 @@
 - `admin/admin.js` — logique du formulaire côté navigateur
 - `admin/admin.css` — mise en page du formulaire
 - `admin/save-voyage.php` — écrit le nouveau voyage côté serveur
-- `admin/login.php`, `admin/auth.php`, `admin/config.php` *(non versionné)* — connexion et secrets (détails dans `admin/SECURITE.md`)
+- `admin/login.php`, `admin/auth.php`, `admin/config.php` *(non versionné)* — connexion et secrets (détails dans `docs/securite.md`)
 
 ## Comment ça marche
 
@@ -21,8 +21,8 @@
 
 - **30 septembre** : première version, utilisant l'API File System Access du navigateur (Chrome uniquement, écriture directe sur le disque local) — fonctionnait seulement en local, jamais une fois le site hébergé.
 - **30 septembre** : remplacée par un vrai backend PHP (`save-voyage.php`), qui fonctionne sur n'importe quel hébergement PHP classique, dans n'importe quel navigateur.
-- **6 octobre** : la page est devenue accessible publiquement (lien dans le footer du site) → tout un travail de sécurisation, détaillé dans `admin/SECURITE.md` (clé d'accès → tentative Apache échouée → Basic Auth PHP → page de connexion par session, solution actuelle).
-- **6 octobre** : bug "Unexpected end of JSON input" lors de l'enregistrement — causé par une erreur de syntaxe PHP (`const` avec un appel de fonction), introduite pendant la sécurisation. Trouvée grâce à un test avec un vrai interpréteur PHP local (MAMP) plutôt qu'en devinant. Détail complet dans `admin/SECURITE.md`.
+- **6 octobre** : la page est devenue accessible publiquement (lien dans le footer du site) → tout un travail de sécurisation, détaillé dans `docs/securite.md` (clé d'accès → tentative Apache échouée → Basic Auth PHP → page de connexion par session, solution actuelle).
+- **6 octobre** : bug "Unexpected end of JSON input" lors de l'enregistrement — causé par une erreur de syntaxe PHP (`const` avec un appel de fonction), introduite pendant la sécurisation. Trouvée grâce à un test avec un vrai interpréteur PHP local (MAMP) plutôt qu'en devinant. Détail complet dans `docs/securite.md`.
 
 ## Points d'attention / pièges rencontrés
 
