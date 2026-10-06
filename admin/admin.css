@@ -13,7 +13,7 @@
 
 .admin-back {
   display: inline-block;
-  margin-bottom: 2rem;
+  margin-bottom: 2rem; 
   color: var(--accent);
   font-size: 0.9rem;
   text-decoration: none;
