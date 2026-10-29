@@ -250,22 +250,21 @@
       return valid;
     }
 
-    function addMarker(voyage, lonOffset) {
-      const marker = L.marker([voyage.coordonnees.lat, voyage.coordonnees.lon + lonOffset], {
-        // Icône orange/accent identique à l'ancien marqueur (voir .map-marker en CSS)
-        icon: L.divIcon({ className: 'map-marker-icon', html: '<span class="map-marker"></span>', iconSize: [14, 14] }),
-      }).bindTooltip(voyage.pays, { direction: 'top', offset: [0, -6] });
+    const markers = voyages
+      .filter(hasValidCoordinates)
+      .map((voyage) => {
+        const marker = L.marker([voyage.coordonnees.lat, voyage.coordonnees.lon], {
+          // Icône orange/accent identique à l'ancien marqueur (voir .map-marker en CSS)
+          icon: L.divIcon({ className: 'map-marker-icon', html: '<span class="map-marker"></span>', iconSize: [14, 14] }),
+        }).bindTooltip(voyage.pays, { direction: 'top', offset: [0, -6] });
 
-      marker.on('click', () => {
-        document.getElementById(voyage.id)?.scrollIntoView({ behavior: 'smooth' });
+        marker.on('click', () => {
+          document.getElementById(voyage.id)?.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        marker.addTo(map);
+        return marker;
       });
-
-      marker.addTo(map);
-      return marker;
-    }
-
-    const validVoyages = voyages.filter(hasValidCoordinates);
-    const markers = validVoyages.map((voyage) => addMarker(voyage, 0));
 
     if (markers.length) {
       const bounds = L.featureGroup(markers).getBounds();
@@ -292,21 +291,6 @@
         // le reste du monde défile progressivement devant les yeux.
         // Démarré après un court délai, le temps que fitBounds (et le
         // zoom correctif ci-dessus) finissent de régler la vue initiale.
-        if (window.matchMedia('(max-width: 820px)').matches) {
-          // Les destinations sont regroupées dans une petite zone : sur
-          // un tour complet du monde, l'essentiel du trajet ne montre
-          // aucun marqueur. On ajoute des copies décalées de chaque
-          // marqueur, réparties autour du globe (tous les 360°/REPEATS),
-          // pour qu'au moins un marqueur soit visible beaucoup plus
-          // souvent pendant le défilement continu — sans jamais faire
-          // machine arrière (contrairement à un simple va-et-vient).
-          const REPEATS = 4;
-          for (let i = 1; i < REPEATS; i += 1) {
-            const lonOffset = i * (360 / REPEATS);
-            validVoyages.forEach((voyage) => addMarker(voyage, lonOffset));
-          }
-        }
-
         setTimeout(() => startContinuousPan(map), 600);
       }
     }
