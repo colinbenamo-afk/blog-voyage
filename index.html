@@ -25,8 +25,13 @@
   <!-- ============================================ -->
   <header class="site-header">
     <img src="assets/logo.png" alt="Logo du blog de voyage" class="site-header-logo-img">
-    <!-- Liens générés dynamiquement par script.js depuis data/voyages.json -->
-    <nav class="site-header-nav"></nav>
+    <!-- Liste déroulante native (<details>) : pas de JS nécessaire pour
+         ouvrir/fermer. Liens générés dynamiquement par script.js depuis
+         data/voyages.json, insérés dans <ul class="site-header-nav-list"> -->
+    <details class="site-header-nav">
+      <summary>Les voyages</summary>
+      <ul class="site-header-nav-list"></ul>
+    </details>
   </header>
 
   <!-- ============================================ -->

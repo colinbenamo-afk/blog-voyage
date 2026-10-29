@@ -66,17 +66,24 @@
     return `${Math.abs(value).toFixed(4)}° ${label}`;
   }
 
-  /* --- Génération de la nav du header --------------------------------- */
+  /* --- Génération de la nav du header (liste déroulante) --------------- */
   function buildNav(voyages) {
-    const nav = document.querySelector('.site-header-nav');
-    if (!nav) return;
+    const details = document.querySelector('.site-header-nav');
+    const list = document.querySelector('.site-header-nav-list');
+    if (!list) return;
 
-    nav.innerHTML = '';
+    list.innerHTML = '';
     voyages.forEach((voyage) => {
+      const item = document.createElement('li');
       const link = document.createElement('a');
       link.href = `#${voyage.id}`;
       link.textContent = voyage.pays;
-      nav.appendChild(link);
+      // Referme le menu après avoir choisi une destination.
+      link.addEventListener('click', () => {
+        if (details) details.removeAttribute('open');
+      });
+      item.appendChild(link);
+      list.appendChild(item);
     });
   }
 

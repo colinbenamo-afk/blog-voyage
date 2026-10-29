@@ -51,3 +51,8 @@ technique de chaque partie, voir `docs/hero.md`, `docs/header.md`,
 - **Premier commit git** du projet, puis **connexion à GitHub** (`github.com/colinbenamo-afk/blog-voyage`, dépôt public).
 - Création de la documentation (`docs/`, ce fichier), puis réorganisation : `CHANGELOG.md` → `docs/JOURNAL.md`, `admin/SECURITE.md` → `docs/securite.md`.
 - **Site synchronisé avec GitHub et poussé (`git push`)** — fin de session.
+
+## 9 octobre 2026
+
+- Essai d'une autre source de tuiles pour la carte du hero (Esri "Dark Gray Canvas", pour teinter la terre indépendamment de l'eau via `sepia`/`hue-rotate`) — **annulé** sur demande, retour à OpenStreetMap + filtre `invert`/`hue-rotate` d'origine.
+- **Nav du header transformée en liste déroulante** ("Les voyages ▾") au lieu des liens côte à côte, via `<details>`/`<summary>` natif (`index.html`, `style.css`, `buildNav` dans `script.js`). Détail dans `docs/header.md`.

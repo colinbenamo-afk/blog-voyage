@@ -88,22 +88,69 @@ header .site-header-logo-img {
   object-fit: contain;
 }
 
+/* Liste déroulante des destinations : <details> natif, pas de JS requis
+   pour ouvrir/fermer. */
 .site-header-nav {
-  display: flex;
-  gap: 1.6rem;
+  position: relative;
 }
 
-.site-header-nav a {
+.site-header-nav summary {
+  cursor: pointer;
+  list-style: none;
   font-family: var(--font-mono);
   color: rgba(255, 255, 255, 0.85);
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   font-weight: 500;
-  text-decoration: none;
   transition: color 0.2s ease;
+  margin-right: 1rem;
 }
 
-.site-header-nav a:hover {
+.site-header-nav summary::-webkit-details-marker {
+  display: none; /* retire le triangle natif Chrome/Safari, remplacé ci-dessous */
+}
+
+.site-header-nav summary::after {
+  content: '▾';
+  margin-left: 0.5em;
+  font-size: 0.75em;
+}
+
+.site-header-nav[open] summary::after {
+  content: '▴';
+}
+
+.site-header-nav summary:hover {
   color: var(--accent);
+}
+
+.site-header-nav-list {
+  position: absolute;
+  top: calc(100% + 0.8rem);
+  right: 0;
+  min-width: 170px;
+  list-style: none;
+  padding: 0.5rem 0;
+  background: rgba(10, 20, 24, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.6);
+}
+
+.site-header-nav-list a {
+  display: block;
+  padding: 0.55rem 1.2rem;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.site-header-nav-list a:hover {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* =========================================================
@@ -166,11 +213,11 @@ header .site-header-logo-img {
 
 .hero-map .map-marker {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 0 0 rgba(135, 158, 112, 0.6);
+  box-shadow: 0 0 0 0 rgba(158, 147, 112, 0.6);
   animation: pulse-marker 2.6s ease-out infinite;
 }
 
@@ -386,12 +433,12 @@ header .site-header-logo-img {
 }
 
 /* Nom du pays (premier step = fiche pratique) : traité à part, en très
-   grand et en minuscules, pour marquer l'entrée dans la destination. Les
-   deux autres titres (moments forts) gardent le style .step h2 ci-dessus. */
+   grand, pour marquer l'entrée dans la destination. Les deux autres
+   titres (moments forts) gardent le style .step h2 ci-dessus. */
 .step[data-step="0"] h2 {
   font-size: clamp(3.5rem, 9vw, 7rem);
   line-height: 0.9;
-  text-transform: lowercase;
+  text-transform: capitalize;
   color: var(--text);
 }
 
@@ -439,11 +486,11 @@ header .site-header-logo-img {
     padding: 1rem 1.2rem;
   }
 
-  .site-header-nav {
-    gap: 1rem;
+  .site-header-nav summary {
+    font-size: 0.8rem;
   }
 
-  .site-header-nav a {
+  .site-header-nav-list a {
     font-size: 0.8rem;
   }
 
