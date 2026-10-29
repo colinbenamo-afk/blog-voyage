@@ -234,6 +234,19 @@
       const bounds = L.featureGroup(markers).getBounds();
       if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [80, 80], maxZoom: 4 });
+
+        // Sur un écran très haut et étroit (mobile portrait), fitBounds
+        // choisit un zoom limité par la largeur disponible, ce qui laisse
+        // de grandes bandes grises (tuiles manquantes) en haut et en bas.
+        // On zoome un peu plus pour combler le vide vertical, une fois que
+        // fitBounds a fini d'appliquer sa propre vue (sinon notre zoom se
+        // fait écraser par la fin de son animation interne).
+        const size = map.getSize();
+        if (size.y > size.x * 1.3) {
+          map.once('moveend', () => {
+            map.setZoom(map.getZoom() + 2, { animate: false });
+          });
+        }
       }
     }
   }

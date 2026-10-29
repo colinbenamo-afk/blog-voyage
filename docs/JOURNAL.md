@@ -56,3 +56,12 @@ technique de chaque partie, voir `docs/hero.md`, `docs/header.md`,
 
 - Essai d'une autre source de tuiles pour la carte du hero (Esri "Dark Gray Canvas", pour teinter la terre indépendamment de l'eau via `sepia`/`hue-rotate`) — **annulé** sur demande, retour à OpenStreetMap + filtre `invert`/`hue-rotate` d'origine.
 - **Nav du header transformée en liste déroulante** ("Les voyages ▾") au lieu des liens côte à côte, via `<details>`/`<summary>` natif (`index.html`, `style.css`, `buildNav` dans `script.js`). Détail dans `docs/header.md`.
+- Titre des pays (premier step) : `text-transform: lowercase` → `capitalize` (majuscule au lieu de tout en minuscule).
+
+## 29 octobre 2026
+
+- **Corrections responsive mobile** (`index.html` ouvert à vide, aucun commit poussé entre le 9 et le 29) :
+  - Titre du hero coupé au milieu d'un mot sur mobile : `clamp()` avait min/max inversés — corrigé. Détail `docs/hero.md`.
+  - Grandes bandes grises en haut/bas de la carte du hero sur écran portrait : zoom `fitBounds` limité par la largeur — corrigé (zoom additionnel après l'événement `moveend`). Détail `docs/hero.md`.
+  - Débordement horizontal de toute la page sur mobile (colonnes des sections destinations ~510-540px sur un écran de 390px) : grille CSS qui ne rétrécissait pas sous la taille du texte non cassable des coordonnées GPS — corrigé (`min-width: 0` + coordonnées qui repassent à la ligne sur petit écran). Détail `docs/destinations.md`.
+- **Texte au-dessus de la photo sur mobile** : sur demande, le texte (titre + coordonnées + description) de chaque destination s'affiche maintenant au-dessus de la photo sur petit écran, au lieu d'en dessous — `.steps-col { order: -1; }` en media query mobile (réordonnancement purement visuel, le HTML garde photo avant texte). Détail `docs/destinations.md`.

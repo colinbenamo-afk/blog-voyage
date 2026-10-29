@@ -263,7 +263,7 @@ header .site-header-logo-img {
 }
 
 .hero-title {
-  font-size: clamp(2.6rem, 8vw, 2rem);
+  font-size: clamp(2rem, 8vw, 2.6rem);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -307,6 +307,16 @@ header .site-header-logo-img {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 2rem;
+  /* Par défaut une colonne "1fr" ne rétrécit pas sous la taille de son
+     contenu (ex: le texte non cassable des coordonnées) : min-width: 0
+     force la grille à respecter la largeur réelle disponible, évite le
+     débordement horizontal sur mobile. */
+  min-width: 0;
+}
+
+.sticky-col,
+.steps-col {
+  min-width: 0;
 }
 
 /* --- Colonne photo, reste fixe à l'écran (position: sticky) --- */
@@ -499,6 +509,13 @@ header .site-header-logo-img {
     padding: 0 1.2rem;
   }
 
+  /* Sur mobile, le texte (titre + description) passe au-dessus de la
+     photo au lieu d'être en dessous — ordre purement visuel, le HTML
+     garde photo avant texte (pas d'impact sur l'ordre de lecture a11y). */
+  .steps-col {
+    order: -1;
+  }
+
   .sticky-col {
     height: 48vh;
     top: 0;
@@ -518,5 +535,11 @@ header .site-header-logo-img {
   .step {
     min-height: 60vh;
     padding: 2rem 0 2rem 1.4rem;
+  }
+
+  /* Les coordonnées restent sur une seule ligne sur grand écran, mais
+     repassent à la ligne ici plutôt que de forcer la page à déborder. */
+  .step p.coords {
+    white-space: normal;
   }
 }
