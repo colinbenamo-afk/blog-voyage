@@ -526,6 +526,11 @@ header .site-header-logo-img {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     padding: 0 1.2rem;
+    /* Zone tampon avant le pays suivant : laisse le texte/la photo de la
+       destination en cours finir de défiler et disparaître complètement
+       avant que ceux de la suivante n'entrent à l'écran. Sans ça, la fin
+       d'une destination et le début de la suivante se chevauchent. */
+    margin-bottom: 60vh;
   }
 
   .steps-col,
@@ -541,11 +546,19 @@ header .site-header-logo-img {
 
   /* Collée dans la moitié BASSE de l'écran (top: 50vh), pendant que
      .text-frame (ci-dessous) reste collé dans la moitié HAUTE : les
-     deux sont donc visibles ensemble tout le temps du scroll. */
+     deux sont donc visibles ensemble tout le temps du scroll.
+     Le margin-top: 50vh est essentiel : sans lui, .sticky-col (qui
+     démarre dans la même case de grille que .steps-col, donc à la même
+     position de départ) se colle ~50vh plus tôt que .text-frame, parce
+     que son décalage de collage (top: 50vh) est plus proche de 0 à
+     franchir. Ce margin-top repousse d'autant sa position de départ,
+     pour que les deux se collent exactement au même moment du scroll
+     (sinon la photo arrive "en avance" et chevauche le texte entrant). */
   .sticky-col {
     position: sticky;
     top: 50vh;
     height: 50vh;
+    margin-top: 50vh;
     z-index: 1;
   }
 
