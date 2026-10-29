@@ -307,13 +307,25 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!isMobile || reducedMotion) return;
 
-    const PAN_SPEED = 0.2; // pixels par frame (~12px/s à 60 images/s)
+    const PAN_SPEED = 0.4; // pixels par frame (~12px/s à 60 images/s)
     let running = true;
     // panBy arrondit son décalage au pixel entier : passer 0.4 directement
     // donnerait donc 0 à chaque appel (aucun mouvement). On accumule les
     // fractions de pixel et on ne déplace la carte que lorsqu'elles
     // atteignent au moins 1px, pour un mouvement net fluide malgré l'arrondi.
     let accumulated = 0;
+
+    // Les tuiles de la carte se répètent à l'infini (comportement standard
+    // de Leaflet), mais pas les marqueurs : leur position ne "boucle" pas
+    // comme les tuiles, donc après un tour complet (une largeur du monde
+    // à ce zoom), ils finissent décalés hors champ pour de bon — alors que
+    // le fond de carte, lui, continue d'avoir l'air parfaitement normal.
+    // On compte la distance totale parcourue et, une fois une largeur du
+    // monde atteinte, on revient silencieusement en arrière d'autant :
+    // visuellement identique (le monde se répète), mais ça remet les
+    // marqueurs dans la zone où Leaflet les positionne correctement.
+    const worldWidth = 256 * Math.pow(2, map.getZoom());
+    let totalPanned = 0;
 
     function step() {
       if (running) {
@@ -322,6 +334,12 @@
         if (whole !== 0) {
           map.panBy([whole, 0], { animate: false });
           accumulated -= whole;
+          totalPanned += whole;
+
+          if (totalPanned >= worldWidth) {
+            map.panBy([-worldWidth, 0], { animate: false });
+            totalPanned -= worldWidth;
+          }
         }
       }
       requestAnimationFrame(step);
