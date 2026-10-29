@@ -410,6 +410,12 @@ header .site-header-logo-img {
   flex-direction: column;
 }
 
+/* Copie du texte utilisée uniquement sur mobile (voir buildTextFrame dans
+   script.js) : cachée par défaut, activée dans la media query mobile. */
+.text-frame {
+  display: none;
+}
+
 /* Espaceurs en haut/bas pour laisser à la première/dernière étape
    le temps d'être bien centrée dans le viewport au déclenchement */
 .step-spacer {
@@ -435,7 +441,8 @@ header .site-header-logo-img {
   border-left-color: var(--primary);
 }
 
-.step h2 {
+.step h2,
+.step-display h2 {
   font-size: clamp(1.6rem, 3vw, 2.4rem);
   font-weight: 800;
   margin-bottom: 1rem;
@@ -445,14 +452,16 @@ header .site-header-logo-img {
 /* Nom du pays (premier step = fiche pratique) : traité à part, en très
    grand, pour marquer l'entrée dans la destination. Les deux autres
    titres (moments forts) gardent le style .step h2 ci-dessus. */
-.step[data-step="0"] h2 {
+.step[data-step="0"] h2,
+.step-display[data-step="0"] h2 {
   font-size: clamp(3.5rem, 9vw, 7rem);
   line-height: 0.9;
   text-transform: capitalize;
   color: var(--text);
 }
 
-.step p {
+.step p,
+.step-display p {
   max-width: 46ch;
   font-weight: 400;
   font-size: 1.05rem;
@@ -461,7 +470,8 @@ header .site-header-logo-img {
 
 /* Coordonnées GPS de chaque destination, en Space Mono pour un rendu
    façon "affichage technique" */
-.step p.coords {
+.step p.coords,
+.step-display p.coords {
   font-family: var(--font-mono);
   font-size: 1.1rem;
   color: var(--primary);
@@ -488,8 +498,10 @@ header .site-header-logo-img {
 
 /* =========================================================
    RESPONSIVE — mobile / tablette
-   La colonne photo reste "sticky" mais réduite en hauteur,
-   posée au-dessus du texte qui défile en dessous.
+   Écran coupé en deux moitiés collées (sticky) : le texte reste fixé
+   dans la moitié haute, la photo dans la moitié basse, toutes deux
+   visibles en même temps pendant que le scroll fait défiler le contenu
+   et déclenche le changement d'étape.
    ========================================================= */
 @media (max-width: 820px) {
   .site-header {
@@ -504,22 +516,37 @@ header .site-header-logo-img {
     font-size: 0.8rem;
   }
 
+  /* .steps-col (texte) et .sticky-col (photo) sont placés dans la même
+     case de grille (ligne 1, colonne 1) : ils se superposent au lieu de
+     s'empiler l'un après l'autre. La hauteur de cette case s'ajuste sur
+     le plus grand des deux — .steps-col, nettement plus haut à cause des
+     .step empilés — ce qui donne à la carte photo (collée, plus basse)
+     toute la place nécessaire pour rester visible pendant le scroll. */
   .destination {
     grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
     padding: 0 1.2rem;
   }
 
-  /* Sur mobile, le texte (titre + description) passe au-dessus de la
-     photo au lieu d'être en dessous — ordre purement visuel, le HTML
-     garde photo avant texte (pas d'impact sur l'ordre de lecture a11y). */
-  .steps-col {
-    order: -1;
+  .steps-col,
+  .sticky-col {
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .sticky-col {
-    height: 48vh;
-    top: 0;
+  .steps-col {
+    position: relative;
     z-index: 2;
+  }
+
+  /* Collée dans la moitié BASSE de l'écran (top: 50vh), pendant que
+     .text-frame (ci-dessous) reste collé dans la moitié HAUTE : les
+     deux sont donc visibles ensemble tout le temps du scroll. */
+  .sticky-col {
+    position: sticky;
+    top: 50vh;
+    height: 50vh;
+    z-index: 1;
   }
 
   .photo-frame {
@@ -529,17 +556,54 @@ header .site-header-logo-img {
   }
 
   .step-spacer {
-    height: 10vh;
+    height: 6vh;
   }
 
+  /* .step n'est plus affiché lui-même sur mobile : il reste un grand bloc
+     invisible en flux normal (sa hauteur donne la distance de scroll que
+     Scrollama observe pour détecter le changement d'étape). Le texte
+     visible est désormais .text-frame/.step-display ci-dessous — un
+     élément "collé" ne peut pas aussi servir de déclencheur de scroll. */
   .step {
-    min-height: 60vh;
+    min-height: 70vh;
+  }
+
+  .step h2,
+  .step p {
+    display: none;
+  }
+
+  /* Cadre collé en haut de l'écran, empilant une copie du texte par étape
+     (comme .photo-frame empile les photos) : une seule visible à la fois
+     via .is-active, pour ne jamais chevaucher la zone photo en dessous. */
+  .text-frame {
+    display: block;
+    position: sticky;
+    top: 0;
+    height: 50vh;
+    overflow: hidden;
+  }
+
+  .step-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: 2rem 0 2rem 1.4rem;
+    border-left: 3px solid rgba(48, 81, 89, 0.12);
+    opacity: 0;
+    transition: opacity 0.5s ease, border-color 0.5s ease;
+  }
+
+  .step-display.is-active {
+    opacity: 1;
+    border-left-color: var(--primary);
   }
 
   /* Les coordonnées restent sur une seule ligne sur grand écran, mais
      repassent à la ligne ici plutôt que de forcer la page à déborder. */
-  .step p.coords {
+  .step-display p.coords {
     white-space: normal;
   }
 }

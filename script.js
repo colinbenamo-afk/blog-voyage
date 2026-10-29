@@ -105,9 +105,64 @@
     return frame;
   }
 
+  // Construit le titre + coordonnées (si premier step) + texte d'une étape.
+  // Réutilisé à la fois pour le contenu "normal" (.step, desktop + lecteurs
+  // d'écran) et pour sa copie affichée sur mobile (.step-display).
+  function buildStepBody(voyage, sectionData, index) {
+    const h2 = document.createElement('h2');
+    h2.textContent = sectionData.titre;
+
+    const nodes = [h2];
+
+    if (index === 0) {
+      const coords = document.createElement('p');
+      coords.className = 'coords';
+      const lat = formatCoord(voyage.coordonnees.lat, 'N', 'S');
+      const lon = formatCoord(voyage.coordonnees.lon, 'E', 'O');
+      coords.innerHTML = `<strong>Latitude</strong> : ${lat} | <strong>Longitude</strong> : ${lon}`;
+      nodes.push(coords);
+    }
+
+    const text = document.createElement('p');
+    text.textContent = sectionData.texte;
+    nodes.push(text);
+
+    return nodes;
+  }
+
+  /* Sur mobile, le texte affiché ne peut pas être le même élément que le
+     déclencheur de scroll (.step) : un élément "collé" (position: sticky)
+     ne peut pas aussi fournir la distance de défilement nécessaire à
+     Scrollama pour détecter le changement d'étape. On sépare donc :
+     - .step (ci-dessous dans buildStepsCol) : élément invisible sur mobile,
+       haut de plusieurs vh, sert uniquement de déclencheur ;
+     - .text-frame/.step-display (ici) : copie du texte, empilée comme les
+       photos (voir buildPhotoFrame), affichée seule à la fois dans un
+       cadre collé en haut de l'écran. Caché entièrement sur grand écran. */
+  function buildTextFrame(voyage) {
+    const frame = document.createElement('div');
+    frame.className = 'text-frame';
+
+    voyage.sections.forEach((sectionData, index) => {
+      const display = document.createElement('div');
+      display.className = 'step-display';
+      if (index === 0) display.classList.add('is-active');
+      display.dataset.step = String(index);
+      buildStepBody(voyage, sectionData, index).forEach((node) => display.appendChild(node));
+      frame.appendChild(display);
+    });
+
+    return frame;
+  }
+
   function buildStepsCol(voyage) {
     const stepsCol = document.createElement('div');
     stepsCol.className = 'steps-col';
+
+    // Première dans le flux : sa position de départ (haut de .steps-col)
+    // lui donne, une fois collée (mobile), toute la hauteur de la colonne
+    // pour rester visible pendant le défilement des .step ci-dessous.
+    stepsCol.appendChild(buildTextFrame(voyage));
 
     const spacerTop = document.createElement('div');
     spacerTop.className = 'step-spacer';
@@ -117,26 +172,7 @@
       const step = document.createElement('div');
       step.className = 'step';
       step.dataset.step = String(index);
-
-      const h2 = document.createElement('h2');
-      h2.textContent = sectionData.titre;
-      step.appendChild(h2);
-
-      // La ligne de coordonnées n'apparaît que sur le premier step
-      // (fiche pratique de la destination), comme dans la version en dur.
-      if (index === 0) {
-        const coords = document.createElement('p');
-        coords.className = 'coords';
-        const lat = formatCoord(voyage.coordonnees.lat, 'N', 'S');
-        const lon = formatCoord(voyage.coordonnees.lon, 'E', 'O');
-        coords.innerHTML = `<strong>Latitude</strong> : ${lat} | <strong>Longitude</strong> : ${lon}`;
-        step.appendChild(coords);
-      }
-
-      const text = document.createElement('p');
-      text.textContent = sectionData.texte;
-      step.appendChild(text);
-
+      buildStepBody(voyage, sectionData, index).forEach((node) => step.appendChild(node));
       stepsCol.appendChild(step);
     });
 
@@ -278,6 +314,13 @@
         photo.classList.toggle('is-active', diff === 0);
         photo.classList.toggle('is-prev', diff === -1);
         photo.classList.toggle('is-next', diff === 1);
+      });
+
+      // Copie du texte affichée sur mobile (voir buildTextFrame) : une
+      // seule étape visible à la fois, sans dégradé (le chevauchement de
+      // deux paragraphes de texte serait illisible, contrairement aux photos).
+      section.querySelectorAll('.step-display').forEach((display) => {
+        display.classList.toggle('is-active', Number(display.dataset.step) === stepIndex);
       });
     }
 
