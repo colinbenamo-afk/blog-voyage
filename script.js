@@ -297,9 +297,13 @@
   }
 
   /* Défilement horizontal continu de la carte du hero (mobile uniquement).
-     panBy avec un décalage positif en x fait glisser le contenu de la
-     carte vers la gauche (comme un bandeau défilant) ; les tuiles OSM se
-     répètent indéfiniment est-ouest, donc rien à réinitialiser. Coupé
+     Les destinations sont regroupées dans une petite zone (fitBounds centre
+     déjà la vue dessus) : faire défiler sur un tour complet du monde revient
+     surtout à traverser de l'océan vide, avec les marqueurs visibles
+     seulement au moment où on retombe pile sur le point de départ. On fait
+     plutôt osciller la carte, de droite à gauche puis de gauche à droite,
+     sur une distance bornée autour de ce centre — les marqueurs restent
+     ainsi visibles la plupart du temps, avec un mouvement continu. Coupé
      dès que le hero sort de l'écran (observer), pour ne pas faire tourner
      la carte inutilement une fois qu'on a scrollé plus bas sur la page. */
   function startContinuousPan(map) {
@@ -307,38 +311,32 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!isMobile || reducedMotion) return;
 
-    const PAN_SPEED = 2.5; // pixels par frame (~150px/s à 60 images/s)
+    const PAN_SPEED = 0.5; // pixels par frame (~30px/s à 60 images/s)
     let running = true;
-    // panBy arrondit son décalage au pixel entier : passer 0.4 directement
-    // donnerait donc 0 à chaque appel (aucun mouvement). On accumule les
-    // fractions de pixel et on ne déplace la carte que lorsqu'elles
-    // atteignent au moins 1px, pour un mouvement net fluide malgré l'arrondi.
+    // panBy arrondit son décalage au pixel entier : passer une valeur en
+    // dessous de 0.5 donnerait donc 0 à chaque appel (aucun mouvement). On
+    // accumule les fractions de pixel et on ne déplace la carte que
+    // lorsqu'elles atteignent au moins 1px, pour un mouvement net fluide
+    // malgré l'arrondi.
     let accumulated = 0;
-
-    // Les tuiles de la carte se répètent à l'infini (comportement standard
-    // de Leaflet), mais pas les marqueurs : leur position ne "boucle" pas
-    // comme les tuiles, donc après un tour complet (une largeur du monde
-    // à ce zoom), ils finissent décalés hors champ pour de bon — alors que
-    // le fond de carte, lui, continue d'avoir l'air parfaitement normal.
-    // On compte la distance totale parcourue et, une fois une largeur du
-    // monde atteinte, on revient silencieusement en arrière d'autant :
-    // visuellement identique (le monde se répète), mais ça remet les
-    // marqueurs dans la zone où Leaflet les positionne correctement.
-    const worldWidth = 256 * Math.pow(2, map.getZoom());
-    let totalPanned = 0;
+    let direction = 1;
+    // Amplitude de l'oscillation : une fraction de la largeur de l'écran
+    // suffit largement à montrer "autre chose" sans jamais s'éloigner de
+    // la zone où se trouvent les marqueurs.
+    const maxOffset = map.getSize().x * 0.6;
+    let position = 0;
 
     function step() {
       if (running) {
-        accumulated += PAN_SPEED;
+        accumulated += PAN_SPEED * direction;
         const whole = Math.trunc(accumulated);
         if (whole !== 0) {
           map.panBy([whole, 0], { animate: false });
           accumulated -= whole;
-          totalPanned += whole;
+          position += whole;
 
-          if (totalPanned >= worldWidth) {
-            map.panBy([-worldWidth, 0], { animate: false });
-            totalPanned -= worldWidth;
+          if (position >= maxOffset || position <= -maxOffset) {
+            direction *= -1;
           }
         }
       }
