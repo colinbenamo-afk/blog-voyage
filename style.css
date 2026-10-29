@@ -512,8 +512,18 @@ header .site-header-logo-img {
     font-size: 0.8rem;
   }
 
+  /* Sur mobile, la liste déroulante devient un grand panneau à coins
+     carrés qui occupe une bonne partie de la largeur de l'écran, avec
+     un texte plus gros — au lieu de la petite boîte arrondie du desktop. */
+  .site-header-nav-list {
+    min-width: 65vw;
+    border-radius: 0;
+    padding: 0.5rem 0;
+  }
+
   .site-header-nav-list a {
-    font-size: 0.8rem;
+    font-size: 1.3rem;
+    padding: 1rem 1.4rem;
   }
 
   /* .steps-col (texte) et .sticky-col (photo) sont placés dans la même
@@ -530,7 +540,7 @@ header .site-header-logo-img {
        destination en cours finir de défiler et disparaître complètement
        avant que ceux de la suivante n'entrent à l'écran. Sans ça, la fin
        d'une destination et le début de la suivante se chevauchent. */
-    margin-bottom: 60vh;
+  
   }
 
   .steps-col,
