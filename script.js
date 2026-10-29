@@ -283,7 +283,57 @@
             map.setZoom(map.getZoom() + 2, { animate: false });
           });
         }
+
+        // Sur mobile, ce zoom plus élevé veut dire qu'on ne voit jamais
+        // le monde entier d'un coup (impossible de tout afficher sans
+        // revenir aux bandes grises ci-dessus). On garde ce zoom mais on
+        // fait défiler la carte en continu, de droite à gauche, pour que
+        // le reste du monde défile progressivement devant les yeux.
+        // Démarré après un court délai, le temps que fitBounds (et le
+        // zoom correctif ci-dessus) finissent de régler la vue initiale.
+        setTimeout(() => startContinuousPan(map), 600);
       }
+    }
+  }
+
+  /* Défilement horizontal continu de la carte du hero (mobile uniquement).
+     panBy avec un décalage positif en x fait glisser le contenu de la
+     carte vers la gauche (comme un bandeau défilant) ; les tuiles OSM se
+     répètent indéfiniment est-ouest, donc rien à réinitialiser. Coupé
+     dès que le hero sort de l'écran (observer), pour ne pas faire tourner
+     la carte inutilement une fois qu'on a scrollé plus bas sur la page. */
+  function startContinuousPan(map) {
+    const isMobile = window.matchMedia('(max-width: 820px)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!isMobile || reducedMotion) return;
+
+    const PAN_SPEED = 0.2; // pixels par frame (~12px/s à 60 images/s)
+    let running = true;
+    // panBy arrondit son décalage au pixel entier : passer 0.4 directement
+    // donnerait donc 0 à chaque appel (aucun mouvement). On accumule les
+    // fractions de pixel et on ne déplace la carte que lorsqu'elles
+    // atteignent au moins 1px, pour un mouvement net fluide malgré l'arrondi.
+    let accumulated = 0;
+
+    function step() {
+      if (running) {
+        accumulated += PAN_SPEED;
+        const whole = Math.trunc(accumulated);
+        if (whole !== 0) {
+          map.panBy([whole, 0], { animate: false });
+          accumulated -= whole;
+        }
+      }
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    const heroEl = document.querySelector('.hero');
+    if ('IntersectionObserver' in window && heroEl) {
+      const observer = new IntersectionObserver(([entry]) => {
+        running = entry.isIntersecting;
+      });
+      observer.observe(heroEl);
     }
   }
 

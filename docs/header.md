@@ -23,6 +23,7 @@ Il contient :
 - **30 septembre** : remplacés par une génération dynamique (`buildNav`) lors du passage au site généré depuis `data/voyages.json` — ajouter un voyage via l'admin met automatiquement à jour la nav, sans toucher à `index.html`.
 - Le logo est passé d'un lien texte à une image (`assets/logo.png`), changement fait directement dans l'éditeur.
 - **9 octobre** : nav transformée en liste déroulante (`<details>`/`<summary>` "Les voyages") au lieu des liens affichés côte à côte — plus compact, surtout utile si le nombre de destinations grandit.
+- **29 octobre** : sur mobile, la liste déroulante (`.site-header-nav-list`) change complètement d'apparence par rapport au desktop — grand panneau à coins carrés (`border-radius: 0`), plus large (`min-width: 65vw`), texte plus gros (`1.3rem` au lieu de `0.8rem`), sur le modèle d'une référence fournie par l'utilisateur, au lieu de la petite boîte arrondie ancrée en haut à droite utilisée sur desktop.
 
 ## Points d'attention / pièges rencontrés
 
