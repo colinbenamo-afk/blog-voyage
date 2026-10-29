@@ -250,21 +250,22 @@
       return valid;
     }
 
-    const markers = voyages
-      .filter(hasValidCoordinates)
-      .map((voyage) => {
-        const marker = L.marker([voyage.coordonnees.lat, voyage.coordonnees.lon], {
-          // Icône orange/accent identique à l'ancien marqueur (voir .map-marker en CSS)
-          icon: L.divIcon({ className: 'map-marker-icon', html: '<span class="map-marker"></span>', iconSize: [14, 14] }),
-        }).bindTooltip(voyage.pays, { direction: 'top', offset: [0, -6] });
+    function addMarker(voyage, lonOffset) {
+      const marker = L.marker([voyage.coordonnees.lat, voyage.coordonnees.lon + lonOffset], {
+        // Icône orange/accent identique à l'ancien marqueur (voir .map-marker en CSS)
+        icon: L.divIcon({ className: 'map-marker-icon', html: '<span class="map-marker"></span>', iconSize: [14, 14] }),
+      }).bindTooltip(voyage.pays, { direction: 'top', offset: [0, -6] });
 
-        marker.on('click', () => {
-          document.getElementById(voyage.id)?.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        marker.addTo(map);
-        return marker;
+      marker.on('click', () => {
+        document.getElementById(voyage.id)?.scrollIntoView({ behavior: 'smooth' });
       });
+
+      marker.addTo(map);
+      return marker;
+    }
+
+    const validVoyages = voyages.filter(hasValidCoordinates);
+    const markers = validVoyages.map((voyage) => addMarker(voyage, 0));
 
     if (markers.length) {
       const bounds = L.featureGroup(markers).getBounds();
@@ -291,19 +292,30 @@
         // le reste du monde défile progressivement devant les yeux.
         // Démarré après un court délai, le temps que fitBounds (et le
         // zoom correctif ci-dessus) finissent de régler la vue initiale.
+        if (window.matchMedia('(max-width: 820px)').matches) {
+          // Les destinations sont regroupées dans une petite zone : sur
+          // un tour complet du monde, l'essentiel du trajet ne montre
+          // aucun marqueur. On ajoute des copies décalées de chaque
+          // marqueur, réparties autour du globe (tous les 360°/REPEATS),
+          // pour qu'au moins un marqueur soit visible beaucoup plus
+          // souvent pendant le défilement continu — sans jamais faire
+          // machine arrière (contrairement à un simple va-et-vient).
+          const REPEATS = 4;
+          for (let i = 1; i < REPEATS; i += 1) {
+            const lonOffset = i * (360 / REPEATS);
+            validVoyages.forEach((voyage) => addMarker(voyage, lonOffset));
+          }
+        }
+
         setTimeout(() => startContinuousPan(map), 600);
       }
     }
   }
 
-  /* Défilement horizontal continu de la carte du hero (mobile uniquement).
-     Les destinations sont regroupées dans une petite zone (fitBounds centre
-     déjà la vue dessus) : faire défiler sur un tour complet du monde revient
-     surtout à traverser de l'océan vide, avec les marqueurs visibles
-     seulement au moment où on retombe pile sur le point de départ. On fait
-     plutôt osciller la carte, de droite à gauche puis de gauche à droite,
-     sur une distance bornée autour de ce centre — les marqueurs restent
-     ainsi visibles la plupart du temps, avec un mouvement continu. Coupé
+  /* Défilement horizontal continu de la carte du hero (mobile uniquement),
+     toujours dans le même sens (droite à gauche) — jamais de machine
+     arrière. Les marqueurs dupliqués autour du globe (voir initHeroMap)
+     font qu'on en croise un souvent, sans avoir besoin d'osciller. Coupé
      dès que le hero sort de l'écran (observer), pour ne pas faire tourner
      la carte inutilement une fois qu'on a scrollé plus bas sur la page. */
   function startContinuousPan(map) {
@@ -319,24 +331,32 @@
     // lorsqu'elles atteignent au moins 1px, pour un mouvement net fluide
     // malgré l'arrondi.
     let accumulated = 0;
-    let direction = 1;
-    // Amplitude de l'oscillation : une fraction de la largeur de l'écran
-    // suffit largement à montrer "autre chose" sans jamais s'éloigner de
-    // la zone où se trouvent les marqueurs.
-    const maxOffset = map.getSize().x * 0.6;
-    let position = 0;
+
+    // Les tuiles de la carte se répètent à l'infini (comportement standard
+    // de Leaflet), mais pas les marqueurs : leur position ne "boucle" pas
+    // comme les tuiles, donc après un tour complet (une largeur du monde
+    // à ce zoom), ils finiraient décalés hors champ pour de bon — alors
+    // que le fond de carte, lui, continue d'avoir l'air parfaitement
+    // normal. On compte la distance totale parcourue et, une fois une
+    // largeur du monde atteinte, on revient silencieusement en arrière
+    // d'autant : visuellement identique (le monde se répète), mais ça
+    // remet les marqueurs dans la zone où Leaflet les positionne
+    // correctement.
+    const worldWidth = 256 * Math.pow(2, map.getZoom());
+    let totalPanned = 0;
 
     function step() {
       if (running) {
-        accumulated += PAN_SPEED * direction;
+        accumulated += PAN_SPEED;
         const whole = Math.trunc(accumulated);
         if (whole !== 0) {
           map.panBy([whole, 0], { animate: false });
           accumulated -= whole;
-          position += whole;
+          totalPanned += whole;
 
-          if (position >= maxOffset || position <= -maxOffset) {
-            direction *= -1;
+          if (totalPanned >= worldWidth) {
+            map.panBy([-worldWidth, 0], { animate: false });
+            totalPanned -= worldWidth;
           }
         }
       }
