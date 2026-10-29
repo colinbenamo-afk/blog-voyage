@@ -8,7 +8,7 @@ requireAdminAuth();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin — Ajouter un voyage</title>
+  <title>Admin — Gérer les voyages</title>
 
   <!-- Mêmes polices que le site public -->
   <link rel="preconnect" href="https://api.fontshare.com">
@@ -27,13 +27,30 @@ requireAdminAuth();
 
   <a class="admin-back" href="../index.html">← Retour au site</a>
 
-  <h1 class="admin-title">Ajouter un voyage</h1>
+  <h1 class="admin-title">Gérer les voyages</h1>
   <p class="admin-intro">
-    Outil interne pour ajouter un voyage à <code>data/voyages.json</code> et ses
-    photos dans <code>assets/images/</code>, sans éditeur de code. L'enregistrement
-    passe par <code>save-voyage.php</code> côté serveur (fonctionne sur n'importe
-    quel hébergement PHP). Cette page n'est pas liée depuis le site public.
+    Outil interne pour ajouter ou supprimer un voyage dans <code>data/voyages.json</code>
+    et ses photos dans <code>assets/images/</code>, sans éditeur de code. Passe par
+    <code>save-voyage.php</code>/<code>delete-voyage.php</code> côté serveur (fonctionne
+    sur n'importe quel hébergement PHP). Cette page n'est pas liée depuis le site public.
   </p>
+
+  <!-- ============================================ -->
+  <!-- VOYAGES EXISTANTS (liste + suppression)       -->
+  <!-- ============================================ -->
+  <section class="admin-panel">
+    <h2>Voyages existants</h2>
+    <p class="admin-intro" style="margin-bottom: 1rem;">
+      Supprimer un voyage retire son entrée de <code>data/voyages.json</code>
+      et ses photos dans <code>assets/images/</code>. Irréversible.
+    </p>
+    <div class="field">
+      <label for="delete-access-key">Clé d'accès admin</label>
+      <input type="password" id="delete-access-key" name="delete-access-key" autocomplete="off">
+    </div>
+    <ul id="voyage-list" class="voyage-list"></ul>
+    <p id="delete-status-line" class="status-line hidden"></p>
+  </section>
 
   <!-- ============================================ -->
   <!-- FORMULAIRE DU VOYAGE                          -->

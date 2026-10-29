@@ -43,17 +43,101 @@ const errorListEl = document.getElementById('error-list');
 const statusLineEl = document.getElementById('status-line');
 const submitBtn = document.getElementById('submit-btn');
 
-/* --- Aperçu de l'id en direct + avertissement si déjà pris ----------- */
-async function getExistingIds() {
+/* --- Chargement de la liste des voyages (id + pays), utilisé à la
+   --- fois pour l'aperçu d'id et pour la liste "Voyages existants" ---- */
+async function getVoyages() {
   try {
     const res = await fetch('../data/voyages.json', { cache: 'no-store' });
     if (!res.ok) return [];
     const voyages = await res.json();
-    return Array.isArray(voyages) ? voyages.map((v) => v.id) : [];
+    return Array.isArray(voyages) ? voyages : [];
   } catch (err) {
     return [];
   }
 }
+
+async function getExistingIds() {
+  const voyages = await getVoyages();
+  return voyages.map((v) => v.id);
+}
+
+/* --- Liste "Voyages existants" + suppression -------------------------- */
+const voyageListEl = document.getElementById('voyage-list');
+const deleteAccessKeyInput = document.getElementById('delete-access-key');
+const deleteStatusLineEl = document.getElementById('delete-status-line');
+
+function setDeleteStatus(html, type) {
+  deleteStatusLineEl.innerHTML = html;
+  deleteStatusLineEl.className = `status-line ${type ? `is-${type}` : ''}`.trim();
+  deleteStatusLineEl.classList.toggle('hidden', !html);
+}
+
+async function loadVoyageList() {
+  const voyages = await getVoyages();
+  voyageListEl.innerHTML = '';
+
+  if (!voyages.length) {
+    const li = document.createElement('li');
+    li.className = 'voyage-list-empty';
+    li.textContent = 'Aucun voyage enregistré pour le moment.';
+    voyageListEl.appendChild(li);
+    return;
+  }
+
+  voyages.forEach((voyage) => {
+    const li = document.createElement('li');
+    li.className = 'voyage-list-item';
+
+    const name = document.createElement('span');
+    name.textContent = voyage.pays || voyage.id;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'voyage-delete-btn';
+    deleteBtn.textContent = 'Supprimer';
+    deleteBtn.addEventListener('click', () => handleDelete(voyage));
+
+    li.appendChild(name);
+    li.appendChild(deleteBtn);
+    voyageListEl.appendChild(li);
+  });
+}
+
+async function handleDelete(voyage) {
+  setDeleteStatus('', null);
+
+  const accessKey = deleteAccessKeyInput.value;
+  if (!accessKey) {
+    setDeleteStatus("La clé d'accès est obligatoire pour supprimer un voyage.", 'error');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Supprimer "${voyage.pays}" ? Cette action retire ses photos et son entrée de voyages.json, sans possibilité d'annuler.`
+  );
+  if (!confirmed) return;
+
+  const body = new FormData();
+  body.append('access_key', accessKey);
+  body.append('id', voyage.id);
+
+  try {
+    const res = await fetch('delete-voyage.php', { method: 'POST', body });
+    const payload = await res.json();
+
+    if (!res.ok || !payload.success) {
+      setDeleteStatus((payload.errors || ['Erreur inconnue lors de la suppression.']).join(' '), 'error');
+      return;
+    }
+
+    setDeleteStatus(`Voyage "${voyage.pays}" supprimé.`, 'success');
+    await loadVoyageList();
+  } catch (err) {
+    setDeleteStatus(`Impossible de contacter le serveur : ${err.message}`, 'error');
+  }
+}
+
+loadVoyageList();
 
 paysInput.addEventListener('input', async () => {
   const id = slugify(paysInput.value);
@@ -176,6 +260,7 @@ form.addEventListener('submit', async (event) => {
     );
     form.reset();
     idPreviewEl.textContent = '—';
+    await loadVoyageList();
   } catch (err) {
     showErrors([`Impossible de contacter le serveur : ${err.message}`]);
     setStatus('', null);

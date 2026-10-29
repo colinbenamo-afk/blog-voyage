@@ -1,21 +1,22 @@
-# Page admin (ajout de voyages)
+# Page admin (ajout / suppression de voyages)
 
 > À mettre à jour à chaque modification de cette section. Pour tout ce qui concerne la **sécurité** de cette page (mots de passe, connexion), voir `docs/securite.md` en détail — ce fichier-ci reste focalisé sur le fonctionnement de l'outil.
 
 ## Fichiers concernés
 
-- `admin/admin.php` — le formulaire (anciennement `admin.html`)
-- `admin/admin.js` — logique du formulaire côté navigateur
-- `admin/admin.css` — mise en page du formulaire
-- `admin/save-voyage.php` — écrit le nouveau voyage côté serveur
+- `admin/admin.php` — la page (formulaire d'ajout + liste "Voyages existants" avec suppression)
+- `admin/admin.js` — logique côté navigateur (formulaire d'ajout, chargement de la liste, suppression)
+- `admin/admin.css` — mise en page de la page admin
+- `admin/save-voyage.php` — écrit un nouveau voyage côté serveur
+- `admin/delete-voyage.php` — supprime un voyage (entrée + photos) côté serveur
 - `admin/login.php`, `admin/auth.php`, `admin/config.php` *(non versionné)* — connexion et secrets (détails dans `docs/securite.md`)
 
 ## Comment ça marche
 
-1. **Connexion** : `admin/login.php` demande un mot de passe, ouvre une session PHP si correct, redirige vers `admin.php`. Toute tentative d'accès à `admin.php` ou `save-voyage.php` sans session valide est bloquée (`requireAdminAuth()` dans `auth.php`).
-2. **Formulaire** (`admin.php`) : pays, date de départ, durée, transport, coordonnées GPS, photo de couverture + 2 "moments forts" (titre, texte, photo chacun). L'id de la destination (`slug`, ex : `"Costa Rica"` → `"costa-rica"`) est calculé en direct à l'écriture du nom du pays, avec un avertissement si l'id existe déjà dans `data/voyages.json`.
-3. **Validation** : côté navigateur (`admin.js`, retour immédiat) *et* côté serveur (`save-voyage.php`, la seule qui compte vraiment — ne jamais faire confiance au navigateur).
-4. **Enregistrement** (`save-voyage.php`) : vérifie le mot de passe + la session, valide tous les champs, convertit les 3 photos en WebP (via GD ; copie le fichier tel quel si l'hébergement ne supporte pas la conversion), écrit les photos dans `assets/images/`, puis **ajoute** (sans jamais supprimer) le nouveau voyage à `data/voyages.json`.
+1. **Connexion** : `admin/login.php` demande un mot de passe, ouvre une session PHP si correct, redirige vers `admin.php`. Toute tentative d'accès à `admin.php`, `save-voyage.php` ou `delete-voyage.php` sans session valide est bloquée (`requireAdminAuth()` dans `auth.php`).
+2. **Ajout** (`admin.php`) : pays, date de départ, durée, transport, coordonnées GPS, photo de couverture + 2 "moments forts" (titre, texte, photo chacun). L'id de la destination (`slug`, ex : `"Costa Rica"` → `"costa-rica"`) est calculé en direct à l'écriture du nom du pays, avec un avertissement si l'id existe déjà dans `data/voyages.json`. Validé côté navigateur (`admin.js`, retour immédiat) *et* côté serveur (`save-voyage.php`, la seule qui compte vraiment).
+3. **Enregistrement** (`save-voyage.php`) : vérifie le mot de passe + la session, valide tous les champs, convertit les 3 photos en WebP (via GD ; copie le fichier tel quel si l'hébergement ne supporte pas la conversion), écrit les photos dans `assets/images/`, puis **ajoute** (sans jamais supprimer) le nouveau voyage à `data/voyages.json`.
+4. **Suppression** : la section "Voyages existants" en haut de `admin.php` liste tous les voyages (chargés depuis `data/voyages.json` via `fetch`, comme pour l'aperçu d'id). Chaque voyage a un bouton "Supprimer" qui demande confirmation (`window.confirm`), puis envoie l'id + la clé d'accès à `delete-voyage.php`, qui retire l'entrée de `voyages.json` **et** supprime ses photos listées dans `photos` (pas en devinant un nom de fichier — lit les chemins réels). La liste se recharge automatiquement après un ajout ou une suppression réussie.
 
 ## Historique / ce qu'on a fait
 
@@ -23,6 +24,7 @@
 - **30 septembre** : remplacée par un vrai backend PHP (`save-voyage.php`), qui fonctionne sur n'importe quel hébergement PHP classique, dans n'importe quel navigateur.
 - **6 octobre** : la page est devenue accessible publiquement (lien dans le footer du site) → tout un travail de sécurisation, détaillé dans `docs/securite.md` (clé d'accès → tentative Apache échouée → Basic Auth PHP → page de connexion par session, solution actuelle).
 - **6 octobre** : bug "Unexpected end of JSON input" lors de l'enregistrement — causé par une erreur de syntaxe PHP (`const` avec un appel de fonction), introduite pendant la sécurisation. Trouvée grâce à un test avec un vrai interpréteur PHP local (MAMP) plutôt qu'en devinant. Détail complet dans `docs/securite.md`.
+- **29 octobre** : **suppression de voyage ajoutée**. Nouvelle section "Voyages existants" dans `admin.php` (liste + bouton "Supprimer" par voyage) et nouvel endpoint `admin/delete-voyage.php`, même structure que `save-voyage.php` (auth, filet de sécurité JSON, clé d'accès). Testé de bout en bout (connexion, liste, suppression réussie, clé manquante, clé invalide) sur une copie isolée du projet avant tout déploiement, pour ne jamais risquer les vraies données pendant les tests.
 
 ## Points d'attention / pièges rencontrés
 
@@ -30,3 +32,4 @@
 - **Toujours valider côté serveur**, jamais seulement côté navigateur — `admin.js` ne sert qu'au confort (retour immédiat), `save-voyage.php` revalide tout.
 - Les coordonnées GPS saisies ne sont validées côté serveur que pour leur format (nombre, plage -90/90 et -180/180) — une valeur dans la plage mais géographiquement fausse (ex : mauvais pays) ne sera pas détectée automatiquement. Voir `docs/hero.md` pour l'impact d'une coordonnée invalide sur la carte du hero.
 - Pas de linter/interpréteur PHP disponible par défaut dans cet environnement de développement — **MAMP** (déjà installé sur la machine) fournit plusieurs versions de PHP utilisables en ligne de commande (`/Applications/MAMP/bin/php/php8.3.30/bin/php`) pour tester (`-l` pour la syntaxe, `-S` pour un serveur local complet). À utiliser systématiquement avant de renvoyer du PHP sur l'hébergement, pour éviter de redécouvrir des bugs après coup.
+- **La suppression est irréversible** : `delete-voyage.php` ne passe pas par une corbeille, il réécrit directement `data/voyages.json` sans l'entrée et supprime ses fichiers photo. Toute modification ou test de ce script doit se faire sur une copie du projet (voir comment c'est fait dans l'historique ci-dessus), jamais directement avec `data/voyages.json` réel.

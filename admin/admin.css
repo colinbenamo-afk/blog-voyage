@@ -149,3 +149,42 @@ button:disabled {
 .hidden {
   display: none !important;
 }
+
+/* --- Liste "Voyages existants" ---------------------------------------- */
+.voyage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.voyage-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(239, 231, 208, 0.12);
+}
+
+.voyage-list-item:last-child {
+  border-bottom: none;
+}
+
+.voyage-list-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.voyage-delete-btn {
+  background: transparent;
+  color: #e0664a;
+  border: 1px solid #e0664a;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.voyage-delete-btn:hover {
+  background: rgba(224, 102, 74, 0.12);
+}
