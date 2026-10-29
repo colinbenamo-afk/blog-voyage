@@ -307,7 +307,7 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!isMobile || reducedMotion) return;
 
-    const PAN_SPEED = 0.4; // pixels par frame (~12px/s à 60 images/s)
+    const PAN_SPEED = 2.5; // pixels par frame (~150px/s à 60 images/s)
     let running = true;
     // panBy arrondit son décalage au pixel entier : passer 0.4 directement
     // donnerait donc 0 à chaque appel (aucun mouvement). On accumule les
