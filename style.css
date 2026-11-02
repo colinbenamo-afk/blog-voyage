@@ -83,7 +83,7 @@ h1, h2 {
 }
 
 header .site-header-logo-img {
-  height: 3rem;
+  height: 2.4rem;
   width: auto;
   object-fit: contain;
 }
@@ -263,7 +263,7 @@ header .site-header-logo-img {
 }
 
 .hero-title {
-  font-size: clamp(2rem, 8vw, 2.6rem);
+  font-size: clamp(1.4rem, 8vw, 2.6rem);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -586,7 +586,7 @@ header .site-header-logo-img {
      visible est désormais .text-frame/.step-display ci-dessous — un
      élément "collé" ne peut pas aussi servir de déclencheur de scroll. */
   .step {
-    min-height: 70vh;
+    min-height: 50vh;
   }
 
   .step h2,
@@ -611,7 +611,11 @@ header .site-header-logo-img {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 2rem 0 2rem 1.4rem;
+    /* Le padding du haut (4.5rem) est volontairement plus grand que les
+       autres côtés : .text-frame colle en haut de l'écran (top: 0), sous
+       le header fixe (~70px de haut). Avec seulement 2rem, un titre sur
+       2 lignes pouvait, une fois centré, remonter sous le header. */
+    padding: 4.5rem 0 2rem 1.4rem;
     opacity: 0;
     transition: opacity 0.5s ease;
   }
