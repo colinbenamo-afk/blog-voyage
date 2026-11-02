@@ -428,17 +428,15 @@ header .site-header-logo-img {
   flex-direction: column;
   justify-content: center;
   padding: 3rem 0 3rem 2.5rem;
-  border-left: 3px solid rgba(48, 81, 89, 0.12);
   opacity: 0.35;
   transform: translateX(4px);
-  transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 /* Effet "illumination" : le texte s'éclaire quand il devient actif */
 .step.is-active {
   opacity: 1;
   transform: translateX(0);
-  border-left-color: var(--primary);
 }
 
 .step h2,
@@ -614,14 +612,12 @@ header .site-header-logo-img {
     flex-direction: column;
     justify-content: center;
     padding: 2rem 0 2rem 1.4rem;
-    border-left: 3px solid rgba(48, 81, 89, 0.12);
     opacity: 0;
-    transition: opacity 0.5s ease, border-color 0.5s ease;
+    transition: opacity 0.5s ease;
   }
 
   .step-display.is-active {
     opacity: 1;
-    border-left-color: var(--primary);
   }
 
   /* Les coordonnées restent sur une seule ligne sur grand écran, mais
