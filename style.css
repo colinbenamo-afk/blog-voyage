@@ -335,6 +335,11 @@ header .site-header-logo-img {
   max-height: 78vh;
   border-radius: 14px;
   overflow: hidden;
+  /* Fond plein, indépendant des photos qu'il contient : pendant les 2s de
+     fondu d'une photo (opacity/scale réduits le temps de la transition),
+     le cadre resterait sinon transparent par endroits, laissant voir le
+     texte derrière (sur mobile, le texte est juste en dessous en z-index). */
+  background-color: var(--background);
   box-shadow: 0 30px 60px -20px rgba(48, 81, 89, 0.35);
 }
 
@@ -549,7 +554,7 @@ header .site-header-logo-img {
 
   .steps-col {
     position: relative;
-    z-index: 2;
+    z-index: 1;
   }
 
   /* Collée dans la moitié BASSE de l'écran (top: 50vh), pendant que
@@ -567,7 +572,7 @@ header .site-header-logo-img {
     top: 50vh;
     height: 50vh;
     margin-top: 50vh;
-    z-index: 1;
+    z-index: 2;
   }
 
   .photo-frame {
