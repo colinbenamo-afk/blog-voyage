@@ -369,8 +369,12 @@
       const section = element.closest('.destination');
       if (!section) return;
 
-      // Illumination du texte : une seule étape active à la fois par section
-      section.querySelectorAll('.step').forEach((step) => {
+      // Illumination du texte : une seule étape active à la fois, sur toute
+      // la page (pas juste "par section" : sinon la dernière étape active
+      // d'un pays garde sa classe is-active pour toujours une fois qu'on
+      // est passé au pays suivant, puisque handleStepEnter ne retouche
+      // ensuite que la nouvelle section).
+      document.querySelectorAll('.step').forEach((step) => {
         step.classList.toggle('is-active', step === element);
       });
 
@@ -378,8 +382,13 @@
       // vertical : la photo active passe au premier plan, tandis que la photo
       // juste avant ("is-prev") et celle juste après ("is-next") restent
       // visibles en fond, plus petites et estompées, pour montrer ce qui vient
-      // de défiler et ce qui arrive.
-      section.querySelectorAll('.photo').forEach((photo) => {
+      // de défiler et ce qui arrive. Les photos des AUTRES sections sont
+      // explicitement désactivées (même raison que ci-dessus).
+      document.querySelectorAll('.photo').forEach((photo) => {
+        if (photo.closest('.destination') !== section) {
+          photo.classList.remove('is-active', 'is-prev', 'is-next');
+          return;
+        }
         const diff = Number(photo.dataset.step) - stepIndex;
         photo.classList.toggle('is-active', diff === 0);
         photo.classList.toggle('is-prev', diff === -1);
@@ -389,8 +398,10 @@
       // Copie du texte affichée sur mobile (voir buildTextFrame) : une
       // seule étape visible à la fois, sans dégradé (le chevauchement de
       // deux paragraphes de texte serait illisible, contrairement aux photos).
-      section.querySelectorAll('.step-display').forEach((display) => {
-        display.classList.toggle('is-active', Number(display.dataset.step) === stepIndex);
+      // Même correctif : il ne doit en rester qu'une sur toute la page.
+      document.querySelectorAll('.step-display').forEach((display) => {
+        const sameSection = display.closest('.destination') === section;
+        display.classList.toggle('is-active', sameSection && Number(display.dataset.step) === stepIndex);
       });
     }
 
