@@ -299,16 +299,16 @@ header .site-header-logo-img {
 .photo {
   position: absolute;
   inset: 0;
-  /* --photo-src (posé en inline dans le HTML/JS) au-dessus d'un dégradé de
-     secours commun à toutes les destinations : tant que le fichier n'existe
-     pas dans assets/images/, le calque image échoue et laisse voir le
-     dégradé ; dès que la photo existe, elle s'affiche seule. Générique pour
-     n'importe quelle destination (y compris celles ajoutées via admin.php),
-     pas seulement les 3 d'origine. */
-  background-image: var(--photo-src), linear-gradient(160deg, var(--secondary), var(--accent));
+  /* --photo-src posé en inline dans le HTML/JS. Un dégradé bleu/vert servait
+     de secours visible le temps du chargement, mais il apparaissait aussi
+     en fond pendant le fondu entre deux photos (quand la photo active,
+     réduite le temps de la transition, ne couvre pas encore tout le cadre)
+     — retiré sur demande, remplacé par un fond uni sombre qui se fond dans
+     le thème au lieu de jurer avec. */
+  background-image: var(--photo-src);
   background-size: cover;
   background-position: center;
-  background-color: var(--text); /* couleur de secours si l'image placeholder est absente */
+  background-color: var(--background); /* couleur de secours tant que la photo n'a pas chargé */
   opacity: 0;
   transform: translateY(10%) scale(0.30);
   transition: opacity 2.0s cubic-bezier(0.22, 0.61, 0.36, 1),

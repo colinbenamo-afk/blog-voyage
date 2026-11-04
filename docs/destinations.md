@@ -25,6 +25,7 @@ Tout ce contenu est **généré en JavaScript** (`initFromVoyagesData` dans `scr
 - **30 septembre** : contenu entièrement codé en dur dans `index.html` → **migré vers `data/voyages.json`**, généré dynamiquement par `script.js`. Permet d'ajouter des destinations sans toucher au HTML (voir `docs/admin.md`).
 - **30 septembre** : le CSS du fond des photos (`background-image`) ne reconnaissait que les 3 destinations d'origine via des sélecteurs `[data-destination="..."]` codés en dur — généralisé en une seule règle `.photo` valable pour n'importe quelle destination.
 - **30 septembre** : titre du pays (premier step) mis en évidence avec un style à part (très grand, minuscules).
+- **Dégradé bleu/vert de secours retiré (4 novembre)** : `.photo` avait un `background-image` à deux couches — la photo, puis un `linear-gradient(160deg, var(--secondary), var(--accent))` (bleu vers vert) en secours si l'image ne chargeait pas. Problème rapporté par l'utilisateur : ce dégradé apparaissait aussi pendant le fondu entre deux photos (la photo active, réduite le temps de la transition d'entrée, ne couvre pas encore tout le cadre), laissant voir un fond bleu entre les photos au scroll. Retiré, remplacé par un simple `background-color: var(--background)` (fond uni sombre, qui se fond dans le thème au lieu de jurer avec le reste de la page).
 
 ## Points d'attention / pièges rencontrés
 
