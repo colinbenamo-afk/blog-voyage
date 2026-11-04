@@ -12,7 +12,7 @@
 
 Le hero occupe tout l'écran (`height: 100vh`) et empile trois couches :
 
-1. **`.hero-map`** — une carte Leaflet en fond (tuiles OpenStreetMap, assombries par un filtre CSS), avec un marqueur orange par destination (généré depuis `data/voyages.json`, voir `docs/destinations.md`). Les marqueurs sont cliquables et scrollent vers la section correspondante. Toutes les interactions de la carte (zoom, déplacement) sont désactivées : elle sert de décor.
+1. **`.hero-map`** — une carte Leaflet en fond (tuiles OpenStreetMap, assombries par un filtre CSS), avec un marqueur orange par destination (généré depuis `data/voyages.json`, voir `docs/destinations.md`). Les marqueurs sont cliquables et scrollent vers la section correspondante, sans légende ni nom de pays affiché. Toutes les interactions de la carte (zoom, déplacement) sont désactivées : elle sert de décor.
 2. **`.hero-overlay`** — un dégradé sombre par-dessus la carte, pour que le titre reste lisible.
 3. **`.hero-content`** — le titre `<h1>` et le sous-titre, centrés.
 
@@ -35,6 +35,7 @@ Le bas du hero s'estompe en transparence (`mask-image`) pour une transition douc
   2. Essai d'un va-et-vient borné (oscillation droite-gauche-droite autour du centre d'origine) — **rejeté par l'utilisateur** : il voulait une vraie rotation continue, pas un mouvement qui "revient en arrière".
   3. Essai de marqueurs dupliqués autour du globe (copies décalées en longitude de chaque marqueur, en plus de l'original) pour qu'un marqueur soit visible plus souvent — **rejeté également** : les copies tombaient sur des zones sans aucun rapport avec les vraies destinations (en plein milieu de l'océan, etc.), ce qui ne voulait rien dire visuellement. Retiré entièrement.
   4. **État actuel : défilement continu dans un seul sens, un seul marqueur réel par destination (4 au total), sans artifice.** Le fait que les marqueurs ne soient pas visibles en permanence est accepté comme comportement normal plutôt que "corrigé" à tout prix — les deux tentatives de correctif (va-et-vient, doublons) avaient chacune un défaut pire que le problème d'origine.
+- **Nom du pays au survol d'un marqueur retiré (4 novembre)** : `bindTooltip(voyage.pays, ...)` sur chaque marqueur, ainsi que le CSS associé (`.hero-map .leaflet-tooltip`, `.leaflet-tooltip-top::before`), retirés sur demande. Les marqueurs restent cliquables (scrollent vers la section correspondante) mais n'affichent plus aucune légende.
 
 ## Points d'attention / pièges rencontrés
 

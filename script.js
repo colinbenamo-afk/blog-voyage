@@ -256,7 +256,7 @@
         const marker = L.marker([voyage.coordonnees.lat, voyage.coordonnees.lon], {
           // Icône orange/accent identique à l'ancien marqueur (voir .map-marker en CSS)
           icon: L.divIcon({ className: 'map-marker-icon', html: '<span class="map-marker"></span>', iconSize: [14, 14] }),
-        }).bindTooltip(voyage.pays, { direction: 'top', offset: [0, -6] });
+        });
 
         marker.on('click', () => {
           document.getElementById(voyage.id)?.scrollIntoView({ behavior: 'smooth' });

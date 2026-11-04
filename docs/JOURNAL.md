@@ -79,3 +79,7 @@ technique de chaque partie, voir `docs/hero.md`, `docs/header.md`,
 - **Texte visible par-dessus la photo pendant son fondu d'entrée** : rapporté avec capture d'écran. `.photo` met 2 secondes à apparaître (opacity/scale/blur) ; sans fond propre sur `.photo-frame`, le texte en dessous se voyait par transparence pendant ce laps de temps, même avec le z-index correctement réglé. Corrigé en donnant à `.photo-frame` un fond opaque, indépendant de la photo qu'il contient. Détail `docs/destinations.md`.
 - **Texte de l'ancien pays qui restait affiché par-dessus la photo du suivant** : rapporté avec capture d'écran. `handleStepEnter` ne mettait à jour `.is-active` que dans la section qui vient d'entrer, jamais dans celle qu'on quitte — la dernière étape active d'un pays gardait donc sa classe `is-active` pour toujours une fois passé au suivant. Corrigé en rendant ces mises à jour globales à toute la page plutôt que limitées à une section. Détail `docs/destinations.md`.
 - **Titre de destination caché sous le header fixe sur mobile** : rapporté par l'utilisateur. Un titre sur 2 lignes, centré verticalement dans le panneau collé en haut de l'écran, pouvait remonter sous le header (seulement `2rem` de marge contre ~70px de header). Corrigé en augmentant cette marge à `4.5rem`. Détail `docs/destinations.md`.
+
+## 4 novembre 2026
+
+- **Nom du pays au survol d'un marqueur du hero retiré** : `bindTooltip(voyage.pays, ...)` et son CSS associé retirés sur demande. Les marqueurs restent cliquables, sans légende affichée. Détail `docs/hero.md`.
