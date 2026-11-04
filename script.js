@@ -209,149 +209,130 @@
     });
   }
 
-  /* --- Carte interactive (hero) : un marqueur par voyage --------------
-     Leaflet + fond de carte sombre (OpenStreetMap), un marqueur cliquable
-     par voyage aux coordonnées du JSON, qui scrolle vers sa section.
-     La carte sert de fond visuel : interactions désactivées pour qu'elle
-     reste un décor et ne vole pas le scroll de la page. */
+  /* --- Globe 3D interactif (hero) : un point par voyage ------------------
+     globe.gl (Three.js), avec un point cliquable par voyage aux coordonnées
+     du JSON, qui scrolle vers sa section. Les frontières des pays viennent
+     de data/countries.geojson (Natural Earth, basse résolution, domaine
+     public). Contrairement à l'ancienne carte Leaflet 2D, le globe est
+     volontairement interactif (glisser pour tourner) sur desktop ET
+     mobile : c'est tout l'intérêt par rapport à la carte plate. */
   function initHeroMap(voyages) {
     const mapEl = document.getElementById('hero-map');
-    if (!mapEl || typeof L === 'undefined') return;
-
-    const map = L.map(mapEl, {
-      zoomControl: false,
-      dragging: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      boxZoom: false,
-      keyboard: false,
-      touchZoom: false,
-      attributionControl: true,
-    }).setView([10, 40], 2);
-
-    // Tuiles OpenStreetMap standard (gratuites, sans clé API) ; l'apparence
-    // sombre vient d'un filtre CSS appliqué au calque de tuiles (voir style.css)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      subdomains: 'abc',
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    if (!mapEl || typeof Globe === 'undefined') return;
 
     // Une seule destination avec des coordonnées aberrantes (ex: lat hors
-    // -90/90) fausse tout le calcul de fitBounds et fait zoomer la carte à
-    // l'extrême pour l'inclure : on l'ignore plutôt que de casser le hero
-    // pour toutes les autres destinations.
+    // -90/90) pourrait fausser l'affichage : on l'ignore plutôt que de
+    // casser le hero pour toutes les autres destinations.
     function hasValidCoordinates(voyage) {
       const { lat, lon } = voyage.coordonnees || {};
       const valid = Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
       if (!valid) {
-        console.warn(`Coordonnées invalides pour "${voyage.pays}" (lat=${lat}, lon=${lon}) : marqueur ignoré sur la carte du hero.`);
+        console.warn(`Coordonnées invalides pour "${voyage.pays}" (lat=${lat}, lon=${lon}) : point ignoré sur le globe du hero.`);
       }
       return valid;
     }
 
-    const markers = voyages
-      .filter(hasValidCoordinates)
-      .map((voyage) => {
-        const marker = L.marker([voyage.coordonnees.lat, voyage.coordonnees.lon], {
-          // Icône orange/accent identique à l'ancien marqueur (voir .map-marker en CSS)
-          icon: L.divIcon({ className: 'map-marker-icon', html: '<span class="map-marker"></span>', iconSize: [14, 14] }),
+    const points = voyages.filter(hasValidCoordinates).map((voyage) => ({
+      id: voyage.id,
+      pays: voyage.pays,
+      lat: voyage.coordonnees.lat,
+      lng: voyage.coordonnees.lon,
+    }));
+
+    let myGlobe;
+    try {
+      myGlobe = Globe()(mapEl)
+        .backgroundColor('rgba(0,0,0,0)')
+        .pointsData(points)
+        .pointLat('lat')
+        .pointLng('lng')
+        .pointColor(() => '#d3621b')
+        .pointAltitude(0.015)
+        .pointRadius(0.45)
+        .pointLabel('pays')
+        .onPointClick((d) => {
+          document.getElementById(d.id)?.scrollIntoView({ behavior: 'smooth' });
+        })
+        .onPointHover((d) => {
+          mapEl.style.cursor = d ? 'pointer' : '';
         });
-
-        marker.on('click', () => {
-          document.getElementById(voyage.id)?.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        marker.addTo(map);
-        return marker;
-      });
-
-    if (markers.length) {
-      const bounds = L.featureGroup(markers).getBounds();
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [80, 80], maxZoom: 4 });
-
-        // Sur un écran très haut et étroit (mobile portrait), fitBounds
-        // choisit un zoom limité par la largeur disponible, ce qui laisse
-        // de grandes bandes grises (tuiles manquantes) en haut et en bas.
-        // On zoome un peu plus pour combler le vide vertical, une fois que
-        // fitBounds a fini d'appliquer sa propre vue (sinon notre zoom se
-        // fait écraser par la fin de son animation interne).
-        const size = map.getSize();
-        if (size.y > size.x * 1.3) {
-          map.once('moveend', () => {
-            map.setZoom(map.getZoom() + 2, { animate: false });
-          });
-        }
-
-        // Sur mobile, ce zoom plus élevé veut dire qu'on ne voit jamais
-        // le monde entier d'un coup (impossible de tout afficher sans
-        // revenir aux bandes grises ci-dessus). On garde ce zoom mais on
-        // fait défiler la carte en continu, de droite à gauche, pour que
-        // le reste du monde défile progressivement devant les yeux.
-        // Démarré après un court délai, le temps que fitBounds (et le
-        // zoom correctif ci-dessus) finissent de régler la vue initiale.
-        setTimeout(() => startContinuousPan(map), 600);
-      }
+    } catch (err) {
+      console.error("Impossible d'initialiser le globe du hero :", err);
+      return;
     }
+
+    // Couleur de l'océan : même teinte que l'ancienne carte 2D (tuiles OSM
+    // + filtre invert/hue-rotate), pour garder l'identité visuelle du site.
+    try {
+      const mat = myGlobe.globeMaterial();
+      mat.color.set('#12262d');
+      mat.emissive.set('#0a1418');
+      mat.emissiveIntensity = 0.35;
+    } catch (e) {}
+
+    try {
+      myGlobe.showAtmosphere(false);
+    } catch (e) {}
+
+    // Frontières des pays, chargées à part (fichier de ~165 Ko) plutôt que
+    // mises en dur ici. Isolé dans son propre .catch : si le fichier ne
+    // charge pas, le globe uni (sans pays) reste quand même utilisable.
+    // Remplissage terre quasi identique à l'océan (comme sur la carte 2D
+    // d'origine) ; ligne de frontière fine et peu lumineuse (sage à faible
+    // opacité), pas une bordure épaisse.
+    fetch('data/countries.geojson')
+      .then((res) => res.json())
+      .then((countries) => {
+        myGlobe
+          .polygonsData(countries.features)
+          .polygonCapColor(() => '#121616')
+          .polygonSideColor(() => '#0a0c0c')
+          .polygonStrokeColor(() => 'rgba(136, 159, 113, 0.35)')
+          .polygonAltitude(0.006);
+      })
+      .catch((err) => console.warn('Impossible de charger data/countries.geojson :', err));
+
+    function resize() {
+      const rect = mapEl.getBoundingClientRect();
+      try {
+        myGlobe.width(rect.width).height(rect.height);
+      } catch (e) {}
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    try {
+      myGlobe.pointOfView({ lat: 15, lng: 20, altitude: 1.8 }, 0);
+    } catch (e) {}
+
+    startGlobeRotation(myGlobe);
   }
 
-  /* Défilement horizontal continu de la carte du hero (mobile uniquement),
-     toujours dans le même sens (droite à gauche) — jamais de machine
-     arrière. Les marqueurs dupliqués autour du globe (voir initHeroMap)
-     font qu'on en croise un souvent, sans avoir besoin d'osciller. Coupé
-     dès que le hero sort de l'écran (observer), pour ne pas faire tourner
-     la carte inutilement une fois qu'on a scrollé plus bas sur la page. */
-  function startContinuousPan(map) {
-    const isMobile = window.matchMedia('(max-width: 820px)').matches;
+  /* Rotation du globe du hero : glisser pour tourner soi-même (contrôles
+     natifs de globe.gl/Three.js, OrbitControls), + rotation automatique
+     douce tant qu'on n'interagit pas. Coupée dès que le hero sort de
+     l'écran, pour ne pas tourner inutilement plus bas sur la page.
+     Fonctionne pareil sur mobile et desktop : `touch-action: pan-y` en CSS
+     (voir style.css) garantit que les gestes tactiles verticaux restent un
+     défilement normal de la page, quoi que fassent les contrôles du globe. */
+  function startGlobeRotation(myGlobe) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!isMobile || reducedMotion) return;
 
-    const PAN_SPEED = 0.5; // pixels par frame (~30px/s à 60 images/s)
-    let running = true;
-    // panBy arrondit son décalage au pixel entier : passer une valeur en
-    // dessous de 0.5 donnerait donc 0 à chaque appel (aucun mouvement). On
-    // accumule les fractions de pixel et on ne déplace la carte que
-    // lorsqu'elles atteignent au moins 1px, pour un mouvement net fluide
-    // malgré l'arrondi.
-    let accumulated = 0;
-
-    // Les tuiles de la carte se répètent à l'infini (comportement standard
-    // de Leaflet), mais pas les marqueurs : leur position ne "boucle" pas
-    // comme les tuiles, donc après un tour complet (une largeur du monde
-    // à ce zoom), ils finiraient décalés hors champ pour de bon — alors
-    // que le fond de carte, lui, continue d'avoir l'air parfaitement
-    // normal. On compte la distance totale parcourue et, une fois une
-    // largeur du monde atteinte, on revient silencieusement en arrière
-    // d'autant : visuellement identique (le monde se répète), mais ça
-    // remet les marqueurs dans la zone où Leaflet les positionne
-    // correctement.
-    const worldWidth = 256 * Math.pow(2, map.getZoom());
-    let totalPanned = 0;
-
-    function step() {
-      if (running) {
-        accumulated += PAN_SPEED;
-        const whole = Math.trunc(accumulated);
-        if (whole !== 0) {
-          map.panBy([whole, 0], { animate: false });
-          accumulated -= whole;
-          totalPanned += whole;
-
-          if (totalPanned >= worldWidth) {
-            map.panBy([-worldWidth, 0], { animate: false });
-            totalPanned -= worldWidth;
-          }
-        }
-      }
-      requestAnimationFrame(step);
+    let controls;
+    try {
+      controls = myGlobe.controls();
+      controls.enableZoom = false;
+      controls.enablePan = false;
+      controls.autoRotate = !reducedMotion;
+      controls.autoRotateSpeed = 0.4;
+    } catch (e) {
+      return;
     }
-    requestAnimationFrame(step);
 
     const heroEl = document.querySelector('.hero');
     if ('IntersectionObserver' in window && heroEl) {
       const observer = new IntersectionObserver(([entry]) => {
-        running = entry.isIntersecting;
+        controls.autoRotate = !reducedMotion && entry.isIntersecting;
       });
       observer.observe(heroEl);
     }

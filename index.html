@@ -12,8 +12,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=bespoke-sans@400,500,700&f[]=expose@400,700&display=swap" rel="stylesheet">
-  <!-- Leaflet : carte interactive utilisée en fond du hero -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -39,7 +37,8 @@
   <!-- ============================================ -->
   <section class="hero">
 
-    <!-- Carte du monde stylisée générée en JS (grille de points formant les continents) -->
+    <!-- Globe 3D interactif (globe.gl) en fond, généré en JS avec un point
+         cliquable par destination — voir initHeroMap dans script.js -->
     <div class="hero-map" id="hero-map" aria-hidden="true"></div>
 
     <!-- Voile sombre + dégradé pour assurer la lisibilité du titre -->
@@ -65,8 +64,8 @@
     <a href="admin/admin.php" class="admin-link">Accès admin</a>
   </footer>
 
-  <!-- Leaflet + Scrollama.js via CDN -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- globe.gl (globe 3D du hero) + Scrollama.js via CDN -->
+  <script src="https://unpkg.com/globe.gl@2.32.0/dist/globe.gl.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/scrollama@3.2.0/build/scrollama.min.js"></script>
   <script src="script.js"></script>
   
