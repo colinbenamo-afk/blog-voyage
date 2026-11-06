@@ -209,14 +209,16 @@
     });
   }
 
-  /* --- Globe 3D interactif (hero) : les pays visités en orange -----------
-     globe.gl (Three.js). Plutôt qu'un point par voyage, c'est le PAYS
-     entier qui se colore en orange (trouvé par géométrie : quel contour de
-     data/countries.geojson contient les coordonnées du voyage). Cliquer un
-     pays orange scrolle vers sa section. Contrairement à l'ancienne carte
-     Leaflet 2D, le globe est volontairement interactif (glisser pour
-     tourner) sur desktop ET mobile : c'est tout l'intérêt par rapport à la
-     carte plate. */
+  /* --- Globe 3D interactif (hero) : un point par voyage ------------------
+     globe.gl (Three.js), avec un point cliquable par voyage aux coordonnées
+     du JSON, qui scrolle vers sa section. Les frontières des pays viennent
+     de data/countries.geojson (Natural Earth, basse résolution, domaine
+     public). Contrairement à l'ancienne carte Leaflet 2D, le globe est
+     volontairement interactif (glisser pour tourner) sur desktop ET
+     mobile : c'est tout l'intérêt par rapport à la carte plate.
+     Essai avec les pays entiers coloriés en orange (au lieu de points)
+     tenté le 4 novembre puis abandonné sur demande : l'utilisateur avait
+     du mal à viser/cliquer un pays précis. Retour aux points, agrandis. */
   function initHeroMap(voyages) {
     const mapEl = document.getElementById('hero-map');
     if (!mapEl || typeof Globe === 'undefined') return;
@@ -228,49 +230,34 @@
       const { lat, lon } = voyage.coordonnees || {};
       const valid = Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
       if (!valid) {
-        console.warn(`Coordonnées invalides pour "${voyage.pays}" (lat=${lat}, lon=${lon}) : voyage ignoré sur le globe du hero.`);
+        console.warn(`Coordonnées invalides pour "${voyage.pays}" (lat=${lat}, lon=${lon}) : point ignoré sur le globe du hero.`);
       }
       return valid;
     }
 
-    const validVoyages = voyages.filter(hasValidCoordinates);
-
-    // Test "point dans un polygone" (ray casting) : utilisé pour savoir
-    // quel pays de data/countries.geojson contient les coordonnées d'un
-    // voyage, sans avoir besoin du nom du pays dans les deux fichiers (qui
-    // ne s'écrirait pas forcément pareil des deux côtés).
-    function pointInRing(lon, lat, ring) {
-      let inside = false;
-      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-        const [xi, yi] = ring[i];
-        const [xj, yj] = ring[j];
-        const intersect = yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
-        if (intersect) inside = !inside;
-      }
-      return inside;
-    }
-
-    function pointInGeometry(lon, lat, geometry) {
-      if (geometry.type === 'Polygon') {
-        return pointInRing(lon, lat, geometry.coordinates[0]);
-      }
-      if (geometry.type === 'MultiPolygon') {
-        return geometry.coordinates.some((poly) => pointInRing(lon, lat, poly[0]));
-      }
-      return false;
-    }
+    const points = voyages.filter(hasValidCoordinates).map((voyage) => ({
+      id: voyage.id,
+      pays: voyage.pays,
+      lat: voyage.coordonnees.lat,
+      lng: voyage.coordonnees.lon,
+    }));
 
     let myGlobe;
     try {
       myGlobe = Globe()(mapEl)
         .backgroundColor('rgba(0,0,0,0)')
-        .onPolygonClick((feature) => {
-          if (feature.__voyageId) {
-            document.getElementById(feature.__voyageId)?.scrollIntoView({ behavior: 'smooth' });
-          }
+        .pointsData(points)
+        .pointLat('lat')
+        .pointLng('lng')
+        .pointColor(() => '#d3621b')
+        .pointAltitude(0.015)
+        .pointRadius(0.7)
+        .pointLabel('pays')
+        .onPointClick((d) => {
+          document.getElementById(d.id)?.scrollIntoView({ behavior: 'smooth' });
         })
-        .onPolygonHover((feature) => {
-          mapEl.style.cursor = feature && feature.__voyageId ? 'pointer' : '';
+        .onPointHover((d) => {
+          mapEl.style.cursor = d ? 'pointer' : '';
         });
     } catch (err) {
       console.error("Impossible d'initialiser le globe du hero :", err);
@@ -293,56 +280,18 @@
     // Frontières des pays, chargées à part (fichier de ~165 Ko) plutôt que
     // mises en dur ici. Isolé dans son propre .catch : si le fichier ne
     // charge pas, le globe uni (sans pays) reste quand même utilisable.
-    // Petit cercle de secours (polygone approximé par des points autour du
-    // centre), pour les voyages dont les coordonnées ne tombent dans aucun
-    // pays du fichier — ça arrive pour de petites îles absentes à cette
-    // résolution (ex: la Guadeloupe pour "Caraïbes"). Sans ça, ce voyage
-    // n'aurait jamais rien d'orange sur le globe.
-    // Le sens de parcours des points compte : GeoJSON attend un contour
-    // extérieur dans le sens horaire vu depuis l'extérieur du globe. Dans
-    // le mauvais sens, le moteur de rendu comprend l'inverse — "tout sauf
-    // ce petit cercle" — et colorie la totalité du globe en orange au lieu
-    // du petit cercle voulu (bug rencontré et corrigé pendant les tests).
-    function makeFallbackCircle(lon, lat, radiusDeg) {
-      const coords = [];
-      const steps = 24;
-      for (let i = 0; i <= steps; i += 1) {
-        const angle = -(i / steps) * 2 * Math.PI;
-        coords.push([lon + radiusDeg * Math.cos(angle), lat + radiusDeg * Math.sin(angle)]);
-      }
-      return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
-    }
-
-    // Chaque pays visité (contenant les coordonnées d'un voyage) est
-    // colorié en orange ; les autres gardent un remplissage quasi
-    // identique à l'océan (comme sur la carte 2D d'origine), distingués
-    // par une fine ligne de frontière sage à faible opacité.
+    // Remplissage terre quasi identique à l'océan (comme sur la carte 2D
+    // d'origine) ; ligne de frontière fine et peu lumineuse (sage à faible
+    // opacité), pas une bordure épaisse.
     fetch('data/countries.geojson')
       .then((res) => res.json())
       .then((countries) => {
-        const matchedIds = new Set();
-        countries.features.forEach((feature) => {
-          const match = validVoyages.find((voyage) =>
-            pointInGeometry(voyage.coordonnees.lon, voyage.coordonnees.lat, feature.geometry)
-          );
-          feature.__voyageId = match ? match.id : null;
-          if (match) matchedIds.add(match.id);
-        });
-
-        const fallbackFeatures = validVoyages
-          .filter((voyage) => !matchedIds.has(voyage.id))
-          .map((voyage) => {
-            const feature = makeFallbackCircle(voyage.coordonnees.lon, voyage.coordonnees.lat, 2.5);
-            feature.__voyageId = voyage.id;
-            return feature;
-          });
-
         myGlobe
-          .polygonsData(countries.features.concat(fallbackFeatures))
-          .polygonCapColor((f) => (f.__voyageId ? '#d3621b' : '#121616'))
-          .polygonSideColor((f) => (f.__voyageId ? '#8a4012' : '#0a0c0c'))
+          .polygonsData(countries.features)
+          .polygonCapColor(() => '#121616')
+          .polygonSideColor(() => '#0a0c0c')
           .polygonStrokeColor(() => 'rgba(136, 159, 113, 0.35)')
-          .polygonAltitude((f) => (f.__voyageId ? 0.012 : 0.006));
+          .polygonAltitude(0.006);
       })
       .catch((err) => console.warn('Impossible de charger data/countries.geojson :', err));
 
