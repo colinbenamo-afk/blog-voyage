@@ -190,6 +190,48 @@ header .site-header-logo-img {
   display: block;
 }
 
+/* Marqueur de destination (élément HTML réel, voir htmlElementsData dans
+   script.js) : zone cliquable volontairement plus grande (40px) que le
+   point visible (14px, dessiné en ::before) — plus facile à viser/toucher
+   qu'un point WebGL "pointsData", qui s'est révélé difficile à cliquer
+   précisément (conflit avec le glisser-tourner du globe au moindre
+   mouvement de souris/doigt pendant le clic). */
+.hero-globe-marker {
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  /* Le conteneur posé par globe.gl autour des marqueurs a pointer-events:
+     none (pour laisser les clics en dehors d'un marqueur atteindre le
+     canvas/glisser-tourner) — ça se transmet aussi aux marqueurs par
+     héritage CSS si on ne le réactive pas ici explicitement. Sans cette
+     ligne, le canvas intercepte tous les clics avant qu'ils n'atteignent
+     le marqueur (confirmé avec Playwright : "canvas intercepts pointer
+     events"), ce qui rendait les marqueurs impossibles à cliquer. */
+  pointer-events: auto;
+}
+
+.hero-globe-marker::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 0 rgba(135, 158, 112, 0.6);
+  animation: pulse-marker 2.6s ease-out infinite;
+}
+
+@keyframes pulse-marker {
+  0%   { box-shadow: 0 0 0 0 rgba(135, 158, 112, 0.55); }
+  70%  { box-shadow: 0 0 0 18px rgba(135, 158, 112, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(135, 158, 112, 0); }
+}
+
 /* Voile pour garantir la lisibilité du texte au-dessus de la carte
    pointer-events: none pour laisser les clics/survols passer jusqu'aux
    marqueurs de la carte en dessous */

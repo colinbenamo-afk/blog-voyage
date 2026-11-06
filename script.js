@@ -242,22 +242,31 @@
       lng: voyage.coordonnees.lon,
     }));
 
+    // Marqueurs en vrais éléments HTML (htmlElementsData), pas des points
+    // WebGL (pointsData) : plus faciles à viser/toucher, puisque le clic
+    // passe par le DOM normal du navigateur au lieu d'un calcul de
+    // précision 3D (raycasting) qui, en plus, entre parfois en conflit
+    // avec le glisser-tourner (OrbitControls) quand le clic contient le
+    // moindre mouvement de souris/doigt. Zone cliquable volontairement
+    // plus grande que le point visible (voir .hero-globe-marker en CSS),
+    // essayé après que l'utilisateur ait eu du mal à cliquer les points
+    // WebGL malgré un `pointRadius` déjà agrandi.
     let myGlobe;
     try {
       myGlobe = Globe()(mapEl)
         .backgroundColor('rgba(0,0,0,0)')
-        .pointsData(points)
-        .pointLat('lat')
-        .pointLng('lng')
-        .pointColor(() => '#d3621b')
-        .pointAltitude(0.015)
-        .pointRadius(0.7)
-        .pointLabel('pays')
-        .onPointClick((d) => {
-          document.getElementById(d.id)?.scrollIntoView({ behavior: 'smooth' });
-        })
-        .onPointHover((d) => {
-          mapEl.style.cursor = d ? 'pointer' : '';
+        .htmlElementsData(points)
+        .htmlLat('lat')
+        .htmlLng('lng')
+        .htmlAltitude(0.015)
+        .htmlElement((d) => {
+          const el = document.createElement('div');
+          el.className = 'hero-globe-marker';
+          el.title = d.pays;
+          el.addEventListener('click', () => {
+            document.getElementById(d.id)?.scrollIntoView({ behavior: 'smooth' });
+          });
+          return el;
         });
     } catch (err) {
       console.error("Impossible d'initialiser le globe du hero :", err);
