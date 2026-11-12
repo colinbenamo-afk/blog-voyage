@@ -258,7 +258,7 @@
         .htmlElementsData(points)
         .htmlLat('lat')
         .htmlLng('lng')
-        .htmlAltitude(0.015)
+        .htmlAltitude(0)
         .htmlElement((d) => {
           const el = document.createElement('div');
           el.className = 'hero-globe-marker';
