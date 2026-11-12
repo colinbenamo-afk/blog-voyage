@@ -343,8 +343,15 @@
 
     const heroEl = document.querySelector('.hero');
     if ('IntersectionObserver' in window && heroEl) {
+      // Hors écran, on coupe aussi la boucle de rendu 3D elle-même (pas
+      // seulement la rotation) : sinon le globe continue d'être redessiné
+      // 60 fois par seconde pour rien pendant qu'on lit les destinations.
       const observer = new IntersectionObserver(([entry]) => {
         controls.autoRotate = !reducedMotion && entry.isIntersecting;
+        try {
+          if (entry.isIntersecting) myGlobe.resumeAnimation();
+          else myGlobe.pauseAnimation();
+        } catch (e) {}
       });
       observer.observe(heroEl);
     }
@@ -416,7 +423,7 @@
      donc on précharge chaque URL manuellement pour savoir quand toutes
      les images sont arrivées et que les hauteurs sont stabilisées. */
   function preloadPhotos(voyages) {
-    const urls = voyages.flatMap((voyage) => voyage.photos);
+    const urls = [...new Set(voyages.flatMap((voyage) => voyage.photos))];
     return Promise.all(
       urls.map(
         (url) =>

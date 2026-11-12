@@ -1,17 +1,15 @@
 /* =========================================================
    VARIABLES DE COULEURS
    Palette imposée + quelques teintes dérivées pour le hero
-   (fond sombre) et les dégradés des photos placeholder.
+   (fond sombre).
    ========================================================= */
 :root {
   --text: #efe7d0;
   --background: #091b20;
   --primary: #D3621B;
-  --secondary: #204F9E;
   --accent: #889f71;
 
-  /* Teintes dérivées, utilisées uniquement pour le hero sombre
-     et les fonds de secours des photos placeholder */
+  /* Teintes dérivées, utilisées uniquement pour le hero sombre */
   --hero-bg-start: #0a1418;
   --hero-bg-end: #10222a;
   --text-muted: #305159a6; /* --text avec transparence, pour le texte inactif */

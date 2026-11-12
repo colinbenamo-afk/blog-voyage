@@ -95,3 +95,10 @@ technique de chaque partie, voir `docs/hero.md`, `docs/header.md`,
 ## 12 novembre 2026
 
 - **Points du globe du hero recollés à la surface** : rapporté par l'utilisateur (les points orange n'étaient pas collés au globe). Mesuré : ~20px de décalage vers le haut-gauche, causé par une marge CSS de centrage qui s'ajoutait au centrage déjà fait par globe.gl, plus une petite altitude. Marge retirée et altitude mise à 0 ; décalage re-mesuré à 0px, clic toujours fonctionnel. Détail `docs/hero.md`.
+- **Passe d'optimisation générale (poids et vitesse), sans changement visible** : audit complet du site (fichiers en double, sélecteurs CSS et fonctions JS inutilisés, poids des images). Le code était déjà propre ; le gros du poids venait des photos.
+  - Photos : `italie-3.webp` était une copie exacte d'`italie-1.webp` (supprimée, `data/voyages.json` pointe deux fois vers `italie-1`) ; 5 photos de 2000 à 3364 px de large ramenées à 1200 px. Dossier photos : 3,5 Mo → 1,15 Mo.
+  - Admin : `save-voyage.php` ramène maintenant toute photo envoyée à 1200 px de large maximum.
+  - Hero : la boucle de rendu du globe est mise en pause quand le hero sort de l'écran (0 image/s au lieu de ~130 pendant qu'on lit les destinations).
+  - Chargement : scripts en `defer`, `preconnect` vers les deux CDN de scripts, dimensions du logo indiquées dans le HTML.
+  - Nettoyage : variable CSS `--secondary` (plus utilisée), `assets/images/README.md` (périmé), `data/README.md` réécrit.
+  - Vérifié par comparaison pixel par pixel de 24 captures avant/après (desktop et mobile) : sections non touchées identiques, photos recompressées à moins de 1/255 d'écart moyen. Détail dans `docs/destinations.md`, `docs/hero.md`, `docs/admin.md`.

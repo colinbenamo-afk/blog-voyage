@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://api.fontshare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=bespoke-sans@400,500,700&f[]=expose@400,700&display=swap" rel="stylesheet">
 
@@ -22,7 +24,7 @@
   <!-- HEADER : barre de navigation fixe             -->
   <!-- ============================================ -->
   <header class="site-header">
-    <img src="assets/logo.png" alt="Logo du blog de voyage" class="site-header-logo-img">
+    <img src="assets/logo.png" alt="Logo du blog de voyage" class="site-header-logo-img" width="543" height="156">
     <!-- Liste déroulante native (<details>) : pas de JS nécessaire pour
          ouvrir/fermer. Liens générés dynamiquement par script.js depuis
          data/voyages.json, insérés dans <ul class="site-header-nav-list"> -->
@@ -65,9 +67,10 @@
   </footer>
 
   <!-- globe.gl (globe 3D du hero) + Scrollama.js via CDN -->
-  <script src="https://unpkg.com/globe.gl@2.32.0/dist/globe.gl.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/scrollama@3.2.0/build/scrollama.min.js"></script>
-  <script src="script.js"></script>
-  
+  <!-- defer : téléchargés sans bloquer l'affichage, exécutés dans cet ordre -->
+  <script defer src="https://unpkg.com/globe.gl@2.32.0/dist/globe.gl.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/scrollama@3.2.0/build/scrollama.min.js"></script>
+  <script defer src="script.js"></script>
+
 </body>
 </html>

@@ -128,6 +128,19 @@ function saveAsWebp(array $file, string $destPath): ?string
         return copy($tmpPath, $destPath) ? null : "Impossible d'enregistrer \"{$file['name']}\".";
     }
 
+    // Une photo de téléphone fait souvent 3000 à 6000px de large, alors
+    // qu'elle s'affiche à ~600px sur le site : on la ramène à 1200px de
+    // large maximum (net même sur écran haute densité), ce qui divise son
+    // poids par 3 à 7 sans différence visible.
+    $maxWidth = 1200;
+    if (imagesx($image) > $maxWidth) {
+        $scaled = imagescale($image, $maxWidth);
+        if ($scaled !== false) {
+            imagedestroy($image);
+            $image = $scaled;
+        }
+    }
+
     // Préserve la transparence (PNG/GIF) lors de la conversion.
     imagepalettetotruecolor($image);
     imagealphablending($image, true);

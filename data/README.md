@@ -1,43 +1,28 @@
-# data/voyages.json
+# Dossier data/
 
-Première étape de la migration vers un contenu basé sur des données : ce fichier
-reprend le contenu déjà écrit dans `index.html` (rien n'a été inventé), pour
-préparer un futur rendu dynamique. `index.html`, `style.css` et `script.js` ne
-sont pas encore branchés dessus — c'est un simple export du contenu actuel.
+Les données lues par le site au chargement. Rien ici n'est écrit à la main en
+temps normal : `voyages.json` est modifié par la page admin, `countries.geojson`
+est un fichier généré.
 
-## Structure
+## voyages.json
 
-Un tableau, un objet par destination, dans l'ordre où elles apparaissent sur le
-site (Caraïbes, Indonésie, Sri Lanka) :
+Un tableau, un objet par destination. Lu par `script.js` pour générer le menu,
+les sections et les points du globe. Écrit par `admin/save-voyage.php` (ajout)
+et `admin/delete-voyage.php` (suppression).
 
-- `id` — slug utilisé comme ancre (`#caraibes`) et comme `data-destination`.
-- `pays` — nom affiché (`<h2>` de la première section).
-- `ordre_depart` — date de départ réelle (`AAAA-MM-JJ`), ou `"À COMPLÉTER"` si
-  elle n'est écrite nulle part dans le site actuel.
-- `duree` — texte libre repris du site (ex : `"3 moins et demie"` pour les
-  Caraïbes, tel quel — la coquille n'a pas été corrigée pour rester fidèle au
-  contenu existant). `"À COMPLÉTER"` quand aucune durée n'est mentionnée.
-- `transport` — mode de transport principal. Déduit du texte quand c'est
-  raisonnablement certain (ex : `"voilier"` pour les Caraïbes, à cause du nom
-  de bateau "Gypsy Soul"), sinon `"À COMPLÉTER"`.
-- `coordonnees` — `{ lat, lon }` en degrés décimaux, repris des
-  `<p class="coords">` du site (Sud et Ouest convertis en valeurs négatives).
-- `photos` — chemins des 3 photos de la destination, dans l'ordre des
-  `--photo-src` du HTML.
-- `sections` — les 3 blocs `.step` de la destination, dans l'ordre : la
-  première sert de fiche pratique (titre = nom du pays), les deux suivantes
-  sont les moments forts.
+- `id` : identifiant sans accent ni espace (`sri-lanka`), sert d'ancre (`#sri-lanka`).
+- `pays` : nom affiché.
+- `ordre_depart` : date de départ (`AAAA-MM-JJ`), sert au tri chronologique. Une
+  valeur non datée (`"À COMPLÉTER"`) place le voyage à la fin.
+- `duree`, `transport` : texte libre.
+- `coordonnees` : `{ lat, lon }` en degrés décimaux (Sud et Ouest négatifs).
+- `photos` : 3 chemins d'images, un par étape. Un même chemin peut apparaître
+  deux fois.
+- `sections` : 3 blocs `{ titre, texte }`. Le premier est la fiche du pays, les
+  deux suivants les moments forts.
 
-## Valeurs "À COMPLÉTER"
+## countries.geojson
 
-Chaque fois qu'une information n'était pas écrite noir sur blanc dans
-`index.html` (date de départ précise, durée, transport), le champ a été laissé
-à `"À COMPLÉTER"` plutôt que deviné. À remplir à la main avant de brancher ce
-fichier sur le site.
-
-## Prochaines étapes (pas encore faites)
-
-Ce fichier n'est pour l'instant lu par rien : `index.html` garde son contenu en
-dur, `style.css` et `script.js` n'ont pas changé. Une étape suivante pourrait
-consister à générer les sections du site à partir de `voyages.json` (en JS, au
-chargement de la page).
+Contours des pays du monde (Natural Earth 110m, domaine public), utilisés pour
+dessiner les frontières sur le globe du hero. Voir `docs/hero.md` pour la façon
+de le régénérer.

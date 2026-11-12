@@ -25,6 +25,7 @@
 - **6 octobre** : la page est devenue accessible publiquement (lien dans le footer du site) → tout un travail de sécurisation, détaillé dans `docs/securite.md` (clé d'accès → tentative Apache échouée → Basic Auth PHP → page de connexion par session, solution actuelle).
 - **6 octobre** : bug "Unexpected end of JSON input" lors de l'enregistrement — causé par une erreur de syntaxe PHP (`const` avec un appel de fonction), introduite pendant la sécurisation. Trouvée grâce à un test avec un vrai interpréteur PHP local (MAMP) plutôt qu'en devinant. Détail complet dans `docs/securite.md`.
 - **29 octobre** : **suppression de voyage ajoutée**. Nouvelle section "Voyages existants" dans `admin.php` (liste + bouton "Supprimer" par voyage) et nouvel endpoint `admin/delete-voyage.php`, même structure que `save-voyage.php` (auth, filet de sécurité JSON, clé d'accès). Testé de bout en bout (connexion, liste, suppression réussie, clé manquante, clé invalide) sur une copie isolée du projet avant tout déploiement, pour ne jamais risquer les vraies données pendant les tests.
+- **12 novembre** : `save-voyage.php` redimensionne les photos envoyées à 1200 px de large maximum avant la conversion WebP (`imagescale`). Une photo de téléphone de 4000 px passe ainsi de plusieurs centaines de Ko à quelques dizaines, sans différence visible sur le site. Les photos déjà plus petites ne sont pas touchées. Testé sur une copie isolée du projet.
 
 ## Points d'attention / pièges rencontrés
 
