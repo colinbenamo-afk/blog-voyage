@@ -102,3 +102,7 @@ technique de chaque partie, voir `docs/hero.md`, `docs/header.md`,
   - Chargement : scripts en `defer`, `preconnect` vers les deux CDN de scripts, dimensions du logo indiquées dans le HTML.
   - Nettoyage : variable CSS `--secondary` (plus utilisée), `assets/images/README.md` (périmé), `data/README.md` réécrit.
   - Vérifié par comparaison pixel par pixel de 24 captures avant/après (desktop et mobile) : sections non touchées identiques, photos recompressées à moins de 1/255 d'écart moyen. Détail dans `docs/destinations.md`, `docs/hero.md`, `docs/admin.md`.
+
+## 13 novembre 2026
+
+- **Prototype de page pays (`page-pays/`)** : page indépendante du blog (`index.html`, `page-pays.css`, `page-pays.js`), avec l'Indonésie en exemple : en-tête photo + coordonnées, bloc d'intro avec une bande de 5 photos (celle du milieu mise en avant), blocs texte + photo alternés, apparition en douceur au scroll. Textes encore en lorem ipsum, photos de test ; pas encore reliée à `data/voyages.json` ni au reste du site.

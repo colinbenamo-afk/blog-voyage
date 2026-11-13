@@ -1,0 +1,230 @@
+/* =========================================================
+   PAGE PAYS (prototype indépendant du blog)
+   Mêmes variables que style.css : quand on connectera la page
+   au blog, ce bloc :root pourra être supprimé.
+   ========================================================= */
+:root {
+  --text: #efe7d0;
+  --background: #091b20;
+  --primary: #D3621B;
+  --accent: #889f71;
+
+  --font-titre: "Expose", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+  --font-texte: "Bespoke Sans", system-ui, sans-serif;
+
+  /* Ratio des photos (portrait 3:4) : une seule valeur à changer pour toute la page */
+  --ratio-photo: 3 / 4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-texte);
+  background-color: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+
+/* ---------- Lien de retour (fixé en haut à gauche) ---------- */
+.retour {
+  position: fixed;
+  top: 1rem;
+  left: 1.25rem;
+  z-index: 50;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(9, 27, 32, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: color 0.2s ease;
+}
+.retour:hover, .retour:focus-visible { color: var(--primary); }
+
+/* =========================================================
+   1. EN-TÊTE : titre + coordonnées
+   ========================================================= */
+.pays-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 4rem;
+}
+
+/* Photo en arrière-plan du hero.
+   Le dégradé assombrit la photo pour garder le titre lisible, puis
+   fond progressivement dans la couleur de la page en bas du hero. */
+.pays-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to bottom,
+      rgba(9, 27, 32, 0.55) 0%,
+      rgba(9, 27, 32, 0.35) 40%,
+      rgba(9, 27, 32, 0.75) 80%,
+      var(--background) 100%),
+    var(--hero-photo) center / cover no-repeat;
+}
+
+.pays-hero h1 {
+  font-family: var(--font-titre);
+  font-weight: 700;
+  font-size: clamp(3rem, 11vw, 7rem);
+  line-height: 1.05;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);   /* lisibilité sur la photo */
+}
+
+.coords {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  color: var(--primary);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* =========================================================
+   2. BLOC INTRO : texte court + bande de photos
+   ========================================================= */
+.bloc-intro {
+  padding: 2rem 0 5rem;
+  text-align: center;
+}
+
+.bloc-intro-texte {
+  max-width: 62ch;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+  font-size: 1.05rem;
+}
+
+.bande { position: relative; }
+
+/* Rangée de photos fixe (pas de carrousel) : les 5 photos sont visibles en
+   même temps, légèrement superposées. La photo du milieu est la plus grande. */
+.bande-piste {
+  --largeur-photo: clamp(110px, 20vw, 290px);
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.bande-photo {
+  flex: 0 0 var(--largeur-photo);
+  margin-inline: calc(var(--largeur-photo) * -0.1);   /* léger chevauchement */
+  transform: scale(var(--echelle, 0.8));
+  filter: brightness(var(--lumiere, 0.7));
+}
+/* Taille, luminosité et ordre d'empilement selon la position */
+.bande-photo:nth-child(3) { --echelle: 1.12; --lumiere: 1;    z-index: 5; }
+.bande-photo:nth-child(2),
+.bande-photo:nth-child(4) { --echelle: 0.92; --lumiere: 0.85; z-index: 4; }
+.bande-photo:nth-child(1),
+.bande-photo:nth-child(5) { --echelle: 0.78; --lumiere: 0.7;  z-index: 3; }
+
+.bande-photo img {
+  width: 100%;
+  height: auto;                    /* sinon l'attribut height du HTML impose 600px et le ratio est ignoré */
+  aspect-ratio: var(--ratio-photo);
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 25px 50px -25px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================================================
+   3. BLOC TEXTE + PILE DE PHOTOS (à répéter)
+   ========================================================= */
+.bloc-texte-photo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;   /* la colonne photo est plus large que celle du texte */
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+}
+
+.bloc-texte {
+  text-align: center;
+  font-size: 1.05rem;
+  max-width: 38ch;
+  margin-inline: auto;
+}
+
+/* Version inversée : photo à gauche, texte à droite (colonnes inversées aussi) */
+.bloc-texte-photo--inverse { grid-template-columns: 1.15fr 0.85fr; }
+.bloc-texte-photo--inverse .bloc-texte { order: 2; }
+.bloc-texte-photo--inverse .photo-unique { order: 1; }
+
+/* Une seule photo à côté du texte */
+.photo-unique {
+  width: min(100%, 480px);
+  margin-inline: auto;
+}
+.photo-unique img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--ratio-photo);
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 25px 50px -25px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================================================
+   PIED DE PAGE
+   ========================================================= */
+.pays-footer {
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+  font-family: var(--font-mono);
+}
+.pays-footer a { color: var(--text); text-decoration: none; }
+.pays-footer a:hover, .pays-footer a:focus-visible { color: var(--primary); }
+
+/* =========================================================
+   APPARITION AU SCROLL (ajoutée par le JS)
+   ========================================================= */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.est-visible { opacity: 1; transform: none; }
+
+/* Si l'utilisateur préfère moins d'animations, on les coupe */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* =========================================================
+   MOBILE : tout passe en une colonne, photo au-dessus du texte
+   ========================================================= */
+@media (max-width: 720px) {
+  /* Sur téléphone, les photos de la rangée passent sur plusieurs lignes, sans chevauchement */
+  .bande-piste { flex-wrap: wrap; gap: 0.75rem; padding: 1rem 1.25rem; }
+  .bande-photo,
+  .bande-photo:nth-child(n) {
+    flex: 0 0 calc(50% - 0.4rem);
+    margin-inline: 0;
+    --echelle: 1;
+    --lumiere: 1;
+  }
+
+  .bloc-texte-photo,
+  .bloc-texte-photo--inverse { grid-template-columns: 1fr; padding-bottom: 3rem; }
+  .bloc-texte-photo .photo-unique,
+  .bloc-texte-photo--inverse .photo-unique { order: 1; width: min(86vw, 400px); }
+  .bloc-texte-photo .bloc-texte,
+  .bloc-texte-photo--inverse .bloc-texte   { order: 2; }
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indonésie – Mon Blog de Voyage</title>
+  <meta name="description" content="Indonésie : mes photos et mes souvenirs de voyage.">
+
+  <!-- Mêmes polices que le blog : Expose + Bespoke Sans (Fontshare), Space Mono (Google Fonts) -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=bespoke-sans@400,500,700&f[]=expose@400,700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="page-pays.css">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body>
+
+  <!-- Lien de retour vers l'accueil du blog (seul lien vers le reste du site) -->
+  <a class="retour" href="../index.html">← Retour au blog</a>
+
+  <!-- ===================================================== -->
+  <!-- 1. EN-TÊTE DE LA PAGE : titre du pays + coordonnées    -->
+  <!-- ===================================================== -->
+  <!-- La photo de fond se change ici, avec une seule variable CSS (--hero-photo) -->
+  <header class="pays-hero" style="--hero-photo: url('../assets/images/indonesie-3.webp');">
+    <h1>L'Indonésie</h1>
+    <!-- Les coordonnées viendront de voyages.json (champ "coordonnees") -->
+    <p class="coords">8.5069° S, 115.2625° E</p>
+  </header>
+
+  <main>
+
+    <!-- ===================================================== -->
+    <!-- 2. BLOC « UNE FOIS PAR PAYS » : texte court + bande    -->
+    <!--    de photos avec la photo centrale mise en avant      -->
+    <!-- ===================================================== -->
+    <section class="bloc-intro reveal">
+      <p class="bloc-intro-texte">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      </p>
+
+      <div class="bande">
+        <!-- Rangée de 5 photos fixes (pas de carrousel). La photo du milieu est
+             plus grande (voir le CSS). Images de test : seront remplacées par
+             les photos de la page pays via voyages.json -->
+        <ul class="bande-piste">
+          <li class="bande-photo"><img src="../assets/images/indonesie-2.webp" alt="Photo d'Indonésie 1" width="450" height="600"></li>
+          <li class="bande-photo"><img src="../assets/images/indonesie-1.webp" alt="Photo d'Indonésie 2" width="450" height="600"></li>
+          <li class="bande-photo"><img src="../assets/images/indonesie-3.webp" alt="Photo d'Indonésie 3" width="450" height="600"></li>
+          <li class="bande-photo"><img src="../assets/images/indonesie-2.webp" alt="Photo d'Indonésie 4" width="450" height="600"></li>
+          <li class="bande-photo"><img src="../assets/images/indonesie-1.webp" alt="Photo d'Indonésie 5" width="450" height="600"></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- 3. BLOC « PLUSIEURS FOIS » : texte + une photo    -->
+    <!--    Se répète autant de fois que nécessaire.             -->
+    <!--    La classe --inverse met la photo à gauche.           -->
+    <!-- ===================================================== -->
+    <section class="bloc-texte-photo reveal">
+      <p class="bloc-texte">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      </p>
+
+      <!-- Une seule photo, à côté du texte -->
+      <figure class="photo-unique">
+        <img src="../assets/images/indonesie-1.webp" alt="Photo d'Indonésie A1" width="450" height="600" loading="lazy">
+      </figure>
+    </section>
+
+    <section class="bloc-texte-photo bloc-texte-photo--inverse reveal">
+      <p class="bloc-texte">
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
+        eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+        sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+
+      <figure class="photo-unique">
+        <img src="../assets/images/indonesie-3.webp" alt="Photo d'Indonésie B1" width="450" height="600" loading="lazy">
+      </figure>
+    </section>
+
+  </main>
+
+  <footer class="pays-footer">
+    <a href="../index.html">← Retour au blog</a>
+  </footer>
+
+  <script src="page-pays.js"></script>
+</body>
+</html>
