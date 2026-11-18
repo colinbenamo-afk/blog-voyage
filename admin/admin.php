@@ -8,7 +8,7 @@ requireAdminAuth();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin — Gérer les voyages</title>
+  <title>Admin — Gérer les voyages et les articles</title>
 
   <!-- Mêmes polices que le site public -->
   <link rel="preconnect" href="https://api.fontshare.com">
@@ -30,9 +30,11 @@ requireAdminAuth();
   <h1 class="admin-title">Gérer les voyages</h1>
   <p class="admin-intro">
     Outil interne pour ajouter ou supprimer un voyage dans <code>data/voyages.json</code>
-    et ses photos dans <code>assets/images/</code>, sans éditeur de code. Passe par
-    <code>save-voyage.php</code>/<code>delete-voyage.php</code> côté serveur (fonctionne
-    sur n'importe quel hébergement PHP). Cette page n'est pas liée depuis le site public.
+    et ses photos dans <code>assets/images/</code>, et pour écrire l'article de chaque pays
+    (<code>data/articles/</code>), sans éditeur de code. Passe par
+    <code>save-voyage.php</code>, <code>delete-voyage.php</code>, <code>save-article.php</code> et
+    <code>delete-article.php</code> côté serveur (fonctionne sur n'importe quel hébergement PHP).
+    Cette page n'est pas liée depuis le site public.
   </p>
 
   <!-- ============================================ -->
@@ -41,8 +43,9 @@ requireAdminAuth();
   <section class="admin-panel">
     <h2>Voyages existants</h2>
     <p class="admin-intro" style="margin-bottom: 1rem;">
-      Supprimer un voyage retire son entrée de <code>data/voyages.json</code>
-      et ses photos dans <code>assets/images/</code>. Irréversible.
+      « Créer l'article » / « Modifier l'article » ouvre l'éditeur de l'article du pays.
+      Supprimer un voyage retire son entrée de <code>data/voyages.json</code>,
+      ses photos dans <code>assets/images/</code> et son article. Irréversible.
     </p>
     <div class="field">
       <label for="delete-access-key">Clé d'accès admin</label>
@@ -50,6 +53,57 @@ requireAdminAuth();
     </div>
     <ul id="voyage-list" class="voyage-list"></ul>
     <p id="delete-status-line" class="status-line hidden"></p>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- ÉDITEUR D'ARTICLE (caché tant qu'on n'a pas    -->
+  <!-- cliqué sur « Créer/Modifier l'article »)       -->
+  <!-- Tout le contenu dynamique est généré par       -->
+  <!-- admin-article.js                               -->
+  <!-- ============================================ -->
+  <section id="article-panel" class="admin-panel hidden">
+    <h2 id="article-heading">Article</h2>
+    <p class="admin-intro" style="margin-bottom: 1rem;">
+      L'article s'affiche sur <code>pays.html</code>. Les photos sont réduites puis converties en WebP
+      automatiquement. Dans les textes, une ligne vide crée un nouveau paragraphe.
+    </p>
+
+    <div class="field">
+      <label for="article-access-key">Clé d'accès admin</label>
+      <input type="password" id="article-access-key" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label for="article-titre">Titre de l'article (affiché en grand en haut de la page)</label>
+      <input type="text" id="article-titre" maxlength="120">
+    </div>
+
+    <div class="field">
+      <label for="article-intro">Texte d'introduction (au-dessus de la rangée de photos)</label>
+      <textarea id="article-intro"></textarea>
+    </div>
+
+    <h3 class="article-subheading">Photo du haut de page</h3>
+    <div id="article-hero"></div>
+
+    <h3 class="article-subheading">Galerie (3 à 7 photos, la photo du milieu est mise en avant)</h3>
+    <div id="article-galerie"></div>
+    <button type="button" id="article-galerie-add" class="btn-secondary">+ Ajouter une photo</button>
+
+    <h3 class="article-subheading">Blocs texte + photo (le côté de la photo alterne tout seul)</h3>
+    <div id="article-blocs"></div>
+    <button type="button" id="article-bloc-add" class="btn-secondary">+ Ajouter un bloc</button>
+
+    <p id="article-photo-count" class="photo-count"></p>
+
+    <ul id="article-error-list" class="error-list hidden"></ul>
+    <p id="article-status-line" class="status-line hidden"></p>
+
+    <div class="article-actions">
+      <button type="button" id="article-save">Enregistrer l'article</button>
+      <button type="button" id="article-close" class="btn-secondary">Fermer</button>
+      <button type="button" id="article-delete" class="voyage-delete-btn hidden">Supprimer l'article</button>
+    </div>
   </section>
 
   <!-- ============================================ -->
@@ -72,8 +126,8 @@ requireAdminAuth();
 
     <div class="field-row">
       <div class="field">
-        <label for="date">Date de départ</label>
-        <input type="date" id="date" name="date" required>
+        <label for="annee">Année du voyage</label>
+        <input type="number" id="annee" name="annee" min="1900" max="2100" step="1" placeholder="ex : 2026" required>
       </div>
       <div class="field">
         <label for="duree">Durée</label>
@@ -144,5 +198,6 @@ requireAdminAuth();
   </form>
 
   <script src="admin.js"></script>
+  <script src="admin-article.js"></script>
 </body>
 </html>

@@ -26,7 +26,7 @@ const form = document.getElementById('voyage-form');
 const accessKeyInput = document.getElementById('access-key');
 const paysInput = document.getElementById('pays');
 const idPreviewEl = document.getElementById('id-preview');
-const dateInput = document.getElementById('date');
+const anneeInput = document.getElementById('annee');
 const dureeInput = document.getElementById('duree');
 const transportSelect = document.getElementById('transport');
 const latInput = document.getElementById('lat');
@@ -91,14 +91,39 @@ async function loadVoyageList() {
     const name = document.createElement('span');
     name.textContent = voyage.pays || voyage.id;
 
+    const actions = document.createElement('div');
+    actions.className = 'voyage-actions';
+
+    // Article du pays : créer (pas encore d'article) ou modifier. L'éditeur
+    // vit dans admin-article.js (window.openArticleEditor).
+    const articleBtn = document.createElement('button');
+    articleBtn.type = 'button';
+    articleBtn.className = 'voyage-article-btn';
+    articleBtn.textContent = voyage.article ? "Modifier l'article" : "Créer l'article";
+    articleBtn.addEventListener('click', () => {
+      if (typeof window.openArticleEditor === 'function') window.openArticleEditor(voyage);
+    });
+    actions.appendChild(articleBtn);
+
+    if (voyage.article) {
+      const viewLink = document.createElement('a');
+      viewLink.className = 'voyage-view-link';
+      viewLink.href = `../pays.html?id=${encodeURIComponent(voyage.id)}`;
+      viewLink.target = '_blank';
+      viewLink.rel = 'noopener';
+      viewLink.textContent = 'Voir';
+      actions.appendChild(viewLink);
+    }
+
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'voyage-delete-btn';
     deleteBtn.textContent = 'Supprimer';
     deleteBtn.addEventListener('click', () => handleDelete(voyage));
+    actions.appendChild(deleteBtn);
 
     li.appendChild(name);
-    li.appendChild(deleteBtn);
+    li.appendChild(actions);
     voyageListEl.appendChild(li);
   });
 }
@@ -113,7 +138,7 @@ async function handleDelete(voyage) {
   }
 
   const confirmed = window.confirm(
-    `Supprimer "${voyage.pays}" ? Cette action retire ses photos et son entrée de voyages.json, sans possibilité d'annuler.`
+    `Supprimer "${voyage.pays}" ? Cette action retire ses photos, son article et son entrée de voyages.json, sans possibilité d'annuler.`
   );
   if (!confirmed) return;
 
@@ -161,7 +186,7 @@ function collectFormValues() {
   return {
     accessKey: accessKeyInput.value,
     pays: paysInput.value.trim(),
-    date: dateInput.value,
+    annee: Number(anneeInput.value),
     duree: dureeInput.value.trim(),
     transport: transportSelect.value,
     lat: parseFloat(latInput.value),
@@ -180,7 +205,9 @@ function validate(values) {
   const errors = [];
   if (!values.accessKey) errors.push("La clé d'accès est obligatoire.");
   if (!values.pays) errors.push('Le pays est obligatoire.');
-  if (!values.date) errors.push('La date de départ est obligatoire.');
+  if (!Number.isInteger(values.annee) || values.annee < 1900 || values.annee > 2100) {
+    errors.push("L'année du voyage doit être une année valide (ex : 2026).");
+  }
   if (!values.duree) errors.push('La durée est obligatoire.');
   if (!values.transport) errors.push('Le mode de transport est obligatoire.');
   if (Number.isNaN(values.lat)) errors.push('La latitude doit être un nombre.');
@@ -228,7 +255,7 @@ form.addEventListener('submit', async (event) => {
   const body = new FormData();
   body.append('access_key', values.accessKey);
   body.append('pays', values.pays);
-  body.append('date', values.date);
+  body.append('annee', String(values.annee));
   body.append('duree', values.duree);
   body.append('transport', values.transport);
   body.append('lat', String(values.lat));

@@ -1,0 +1,25 @@
+{
+    "id": "sri-lanka",
+    "titre": "Sri Lanka",
+    "intro": "Le Sri Lanka est un pays où les gens sont super sympas et les paysages magnifiques. On croise des animaux sauvages partout où l’on va, surtout de nuit.",
+    "hero": "assets/articles/sri-lanka/hero-6305357e.webp",
+    "galerie": [
+        "assets/articles/sri-lanka/galerie-f7fe53fa.webp",
+        "assets/articles/sri-lanka/galerie-c2460af1.webp",
+        "assets/articles/sri-lanka/galerie-b6a932d7.webp"
+    ],
+    "blocs": [
+        {
+            "texte": "Il y a des trains qui desservent presque tout le pays. Ils ne coûtent vraiment pas cher, par contre les horaires ne sont pas vraiment exacts. Prendre le train, c’est vraiment un truc que je conseille de faire.",
+            "photo": "assets/articles/sri-lanka/bloc-f44c2600.webp"
+        },
+        {
+            "texte": "On peut aussi louer un tuk-tuk pour environ 20 CHF la journée. Avec ça, on peut aller partout où on veut dans le pays avec nos affaires. Les routes ne sont pas trop compliquées à conduire, juste un peu dans les villes, mais ça va.\n\nMoi, j’ai pris les transports publics locaux : train, bus, tuk-tuk. Ça fonctionne très bien, mais il y a des endroits où c’est un peu compliqué d’aller, parce qu’ils sont mal desservis à cause des réserves naturelles. Une fois à un spot, il est très facile de louer un scooter pour la journée, pour environ 5 CHF par jour.",
+            "photo": "assets/articles/sri-lanka/bloc-fd0931f9.webp"
+        },
+        {
+            "texte": "La capitale, c’est Colombo. Je ne conseille vraiment pas d’aller là-bas : il y a trop de monde, le trafic est atroce, la ville est mal organisée et ce n’est pas super joli. Mieux vaut aller à Negombo, qui est juste au nord de Colombo.\nLes gens sont super sympas, adorables même. Ils sont vraiment dans le partage et toujours souriants. Il faut juste faire gaffe si tu vas en soirée, dans une boîte de nuit ou sur la plage : il y a plein d’histoires de filles qui se font droguer…\nDès qu’on s’éloigne des villes, on voit des éléphants partout, dès le coucher ou le lever du soleil, au milieu de la route. Il y a aussi énormément de singes. Ils sont super adorables, mais il faut faire attention à ses affaires et à sa nourriture, parce que ce sont un peu des voleurs. Mais ils sont trop marrants.\nDans la jungle, il y a des serpents bien dangereux, dont il faut se méfier là où l’on marche, et pas mal d’araignées, un peu dangereuses quand même. Et surtout, dans l’eau, il y a de gros, gros crocodiles : il ne faut vraiment pas se baigner n’importe où.",
+            "photo": "assets/articles/sri-lanka/bloc-a504f0cc.webp"
+        }
+    ]
+}

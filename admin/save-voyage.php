@@ -76,18 +76,10 @@ function slugify(string $text): string
     return trim($slug, '-');
 }
 
-function buildIntroText(string $date, string $duree, string $transport): string
+// Texte de la fiche pratique (premier bloc), ex : "En 2026, 3 jours en van."
+function buildIntroText(int $annee, string $duree, string $transport): string
 {
-    $timestamp = strtotime($date);
-    $dateLabel = $date;
-    if ($timestamp !== false) {
-        $mois = [
-            'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
-        ];
-        $dateLabel = (int) date('j', $timestamp) . ' ' . $mois[(int) date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
-    }
-    return "Départ le {$dateLabel}, {$duree}, en {$transport}.";
+    return "En {$annee}, {$duree} en {$transport}.";
 }
 
 // Enregistre un fichier uploadé en WebP à l'emplacement donné.
@@ -168,7 +160,6 @@ if (($_POST['access_key'] ?? '') !== ACCESS_KEY) {
 
 $requiredText = [
     'pays' => 'Le pays',
-    'date' => 'La date de départ',
     'duree' => 'La durée',
     'transport' => 'Le mode de transport',
     'moment1_titre' => 'Le titre du moment fort n°1',
@@ -182,6 +173,13 @@ foreach ($requiredText as $field => $label) {
     if (trim((string) ($_POST[$field] ?? '')) === '') {
         $errors[] = "{$label} est obligatoire.";
     }
+}
+
+// Seule l'année est demandée : elle suffit à classer les voyages dans
+// l'ordre chronologique (frise de la page d'accueil).
+$annee = filter_var($_POST['annee'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1900, 'max_range' => 2100]]);
+if ($annee === false || $annee === null) {
+    $errors[] = "L'année du voyage doit être une année valide (ex : 2026).";
 }
 
 $lat = filter_var($_POST['lat'] ?? null, FILTER_VALIDATE_FLOAT);
@@ -266,7 +264,7 @@ $transport = trim((string) $_POST['transport']);
 $newVoyage = [
     'id' => $id,
     'pays' => $pays,
-    'ordre_depart' => (string) $_POST['date'],
+    'annee' => $annee,
     'duree' => $duree,
     'transport' => $transport,
     'coordonnees' => ['lat' => $lat, 'lon' => $lon],
@@ -276,7 +274,7 @@ $newVoyage = [
         "assets/images/{$id}-3.webp",
     ],
     'sections' => [
-        ['titre' => $pays, 'texte' => buildIntroText((string) $_POST['date'], $duree, $transport)],
+        ['titre' => $pays, 'texte' => buildIntroText($annee, $duree, $transport)],
         ['titre' => trim((string) $_POST['moment1_titre']), 'texte' => trim((string) $_POST['moment1_texte'])],
         ['titre' => trim((string) $_POST['moment2_titre']), 'texte' => trim((string) $_POST['moment2_texte'])],
     ],

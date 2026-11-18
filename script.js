@@ -37,7 +37,7 @@
    1. SITE GÉNÉRÉ DEPUIS data/voyages.json
    Le contenu (nav, sections destinations, marqueurs de la carte du
    hero) n'est plus écrit en dur dans index.html : il est généré ici
-   à partir du JSON, trié chronologiquement par date de départ. Le
+   à partir du JSON, trié chronologiquement par année du voyage. Le
    rendu final (classes CSS, data-attributes) reproduit exactement
    ce qui était auparavant codé en dur, pour que style.css n'ait
    rien à changer.
@@ -45,19 +45,118 @@
 (function initFromVoyagesData() {
   const DATA_URL = 'data/voyages.json';
 
-  /* --- Tri chronologique -------------------------------------------- */
-  // Les voyages sans date connue ("À COMPLÉTER") sont envoyés à la fin,
-  // dans leur ordre d'origine (tri stable), pour ne rien changer tant
-  // que les dates de départ n'ont pas été renseignées.
-  function parseSortableDate(value) {
-    const timestamp = Date.parse(value);
-    return Number.isNaN(timestamp) ? Infinity : timestamp;
+  /* --- Tri chronologique par année ---------------------------------- */
+  // Seule l'année compte (c'est tout ce que l'admin demande). Les voyages
+  // sans année sont envoyés à la fin. Le tri de JS est stable : deux
+  // voyages de la même année gardent l'ordre dans lequel ils ont été
+  // ajoutés.
+  // Repli : un voyages.json plus ancien (ex : celui déjà en ligne) n'a pas
+  // de champ "annee" mais une date "ordre_depart" (AAAA-MM-JJ) : on en
+  // reprend l'année, pour ne rien casser tant qu'il n'a pas été mis à jour.
+  function getAnnee(voyage) {
+    const annee = Number(voyage.annee);
+    if (Number.isInteger(annee) && annee > 0) return annee;
+    const match = /^(\d{4})/.exec(String(voyage.ordre_depart ?? ''));
+    return match ? Number(match[1]) : null;
   }
 
-  function sortByDeparture(voyages) {
-    return [...voyages].sort(
-      (a, b) => parseSortableDate(a.ordre_depart) - parseSortableDate(b.ordre_depart)
-    );
+  function sortByYear(voyages) {
+    const rank = (voyage) => getAnnee(voyage) ?? Number.MAX_SAFE_INTEGER;
+    return [...voyages].sort((a, b) => rank(a) - rank(b));
+  }
+
+  /* --- Frise chronologique (bord gauche de la page) --------------------
+     Inspirée de destination2075.com : un petit trait par voyage, serrés les
+     uns sous les autres. Le trait du voyage en cours s'allonge, et une seule
+     année est affichée à côté de lui ; quand on change de voyage, ses
+     chiffres défilent comme un compteur. Cliquer un trait mène au pays.
+     Cachée sur le hero. */
+  function buildTimeline(voyages) {
+    const main = document.querySelector('main');
+    if (!main || !voyages.length) return () => {};
+
+    const frise = document.createElement('nav');
+    frise.className = 'frise';
+    frise.setAttribute('aria-label', 'Frise chronologique des voyages');
+
+    const ticksEl = document.createElement('div');
+    ticksEl.className = 'frise-ticks';
+    const items = voyages.map((voyage) => {
+      const annee = getAnnee(voyage);
+      const tick = document.createElement('a');
+      tick.className = 'frise-tick';
+      tick.href = `#${voyage.id}`;
+      tick.setAttribute('aria-label', annee ? `${voyage.pays} (${annee})` : voyage.pays);
+      ticksEl.appendChild(tick);
+      return { tick, annee, section: document.getElementById(voyage.id) };
+    });
+
+    // L'année : 4 colonnes contenant chacune les chiffres 0 à 9 empilés.
+    // Afficher un chiffre = faire glisser sa colonne verticalement (CSS),
+    // d'où l'effet de compteur qui défile.
+    const label = document.createElement('span');
+    label.className = 'frise-annee';
+    label.setAttribute('aria-hidden', 'true');
+    const strips = [];
+    for (let i = 0; i < 4; i += 1) {
+      const col = document.createElement('span');
+      col.className = 'frise-chiffre';
+      const strip = document.createElement('span');
+      strip.className = 'frise-bande';
+      for (let d = 0; d <= 9; d += 1) {
+        const digit = document.createElement('span');
+        digit.textContent = d;
+        strip.appendChild(digit);
+      }
+      col.appendChild(strip);
+      label.appendChild(col);
+      strips.push(strip);
+    }
+    ticksEl.appendChild(label);
+
+    frise.appendChild(ticksEl);
+    document.body.appendChild(frise);
+
+    let current = null;
+
+    function showYear(annee) {
+      label.classList.toggle('is-empty', annee === null);
+      if (annee === null) return;
+      String(annee).padStart(4, '0').split('').forEach((digit, i) => {
+        strips[i].style.transform = `translateY(${-Number(digit)}em)`;
+      });
+    }
+
+    function update() {
+      const reference = window.scrollY + window.innerHeight * 0.5;
+      const mainTop = main.offsetTop;
+      frise.classList.toggle('is-visible', reference > mainTop && reference < mainTop + main.offsetHeight);
+
+      let active = items[0];
+      items.forEach((item) => {
+        if (item.section && reference >= item.section.offsetTop) active = item;
+      });
+      if (active === current) return;
+      current?.tick.classList.remove('is-active');
+      active.tick.classList.add('is-active');
+      label.style.setProperty('--y', `${active.tick.offsetTop + active.tick.offsetHeight / 2}px`);
+      showYear(active.annee);
+      current = active;
+    }
+
+    let pending = false;
+    const schedule = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        update();
+      });
+    };
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+    return schedule;
   }
 
   /* --- Formatage des coordonnées, identique à l'ancien texte en dur -- */
@@ -126,6 +225,25 @@
     const text = document.createElement('p');
     text.textContent = sectionData.texte;
     nodes.push(text);
+
+    // Bouton « Voir la suite du voyage » sous le DERNIER texte du pays, vers
+    // son article. Seulement si un article a été créé dans l'admin (l'admin
+    // met "article": true dans voyages.json) : pas de bouton vers une page
+    // vide. Dans un <p> pour suivre les mêmes règles d'affichage que le
+    // texte (voir style.css).
+    if (index === voyage.sections.length - 1 && voyage.article) {
+      const suite = document.createElement('p');
+      suite.className = 'voyage-suite';
+      const a = document.createElement('a');
+      a.href = `pays.html?id=${encodeURIComponent(voyage.id)}`;
+      a.textContent = 'Voir la suite du voyage';
+      const fleche = document.createElement('span');
+      fleche.setAttribute('aria-hidden', 'true');
+      fleche.textContent = '→';
+      a.appendChild(fleche);
+      suite.appendChild(a);
+      nodes.push(suite);
+    }
 
     return nodes;
   }
@@ -324,9 +442,10 @@
      natifs de globe.gl/Three.js, OrbitControls), + rotation automatique
      douce tant qu'on n'interagit pas. Coupée dès que le hero sort de
      l'écran, pour ne pas tourner inutilement plus bas sur la page.
-     Fonctionne pareil sur mobile et desktop : `touch-action: pan-y` en CSS
-     (voir style.css) garantit que les gestes tactiles verticaux restent un
-     défilement normal de la page, quoi que fassent les contrôles du globe. */
+     Sur mobile (≤ 820px), le globe ne tourne qu'horizontalement : l'angle
+     vertical est verrouillé et le canvas repasse en `touch-action: pan-y`
+     (OrbitControls le met à `none`, ce qui bloquait le défilement de la
+     page au doigt). Glisser à la verticale = scroller la page. */
   function startGlobeRotation(myGlobe) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -337,6 +456,12 @@
       controls.enablePan = false;
       controls.autoRotate = !reducedMotion;
       controls.autoRotateSpeed = 0.4;
+      if (window.matchMedia('(max-width: 820px)').matches) {
+        const polar = controls.getPolarAngle();
+        controls.minPolarAngle = polar;
+        controls.maxPolarAngle = polar;
+        controls.domElement.style.touchAction = 'pan-y';
+      }
     } catch (e) {
       return;
     }
@@ -440,10 +565,11 @@
   fetch(DATA_URL)
     .then((res) => res.json())
     .then((voyages) => {
-      const sorted = sortByDeparture(voyages);
+      const sorted = sortByYear(voyages);
 
       buildNav(sorted);
       buildDestinations(sorted);
+      const refreshTimeline = buildTimeline(sorted);
       initHeroMap(sorted);
 
       // Scrollama a besoin que les .step existent déjà dans le DOM :
@@ -452,7 +578,10 @@
 
       // Les photos (background-image) peuvent arriver après coup et décaler
       // les hauteurs des sections : on recalcule Scrollama une fois chargées.
-      preloadPhotos(sorted).then(() => scroller.resize());
+      preloadPhotos(sorted).then(() => {
+        scroller.resize();
+        refreshTimeline();
+      });
     })
     .catch((err) => console.error('Impossible de charger data/voyages.json :', err));
 })();

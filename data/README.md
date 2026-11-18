@@ -12,14 +12,24 @@ et `admin/delete-voyage.php` (suppression).
 
 - `id` : identifiant sans accent ni espace (`sri-lanka`), sert d'ancre (`#sri-lanka`).
 - `pays` : nom affiché.
-- `ordre_depart` : date de départ (`AAAA-MM-JJ`), sert au tri chronologique. Une
-  valeur non datée (`"À COMPLÉTER"`) place le voyage à la fin.
+- `annee` : année du voyage (nombre, ex : `2026`), sert au tri chronologique et à
+  la frise de la page d'accueil. `null` si inconnue : le voyage est alors placé
+  à la fin et n'apparaît pas dans la frise.
 - `duree`, `transport` : texte libre.
 - `coordonnees` : `{ lat, lon }` en degrés décimaux (Sud et Ouest négatifs).
 - `photos` : 3 chemins d'images, un par étape. Un même chemin peut apparaître
   deux fois.
 - `sections` : 3 blocs `{ titre, texte }`. Le premier est la fiche du pays, les
   deux suivants les moments forts.
+- `article` *(optionnel)* : `true` si le pays a un article (`data/articles/<id>.json`).
+  Ajouté/retiré par `admin/save-article.php` et `admin/delete-article.php` ; fait
+  apparaître le lien « Lire l'article » sur l'accueil.
+
+## articles/
+
+Un fichier `<id>.json` par article de pays (titre, intro, photo du haut, galerie,
+blocs texte + photo). Écrit par `admin/save-article.php`, lu par `pays.js`. Les
+photos associées sont dans `assets/articles/<id>/`. Format détaillé : `docs/pays.md`.
 
 ## countries.geojson
 

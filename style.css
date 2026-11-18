@@ -469,6 +469,35 @@ header .site-header-logo-img {
   white-space: nowrap;
 }
 
+/* Bouton « Voir la suite du voyage » sous le dernier texte d'un pays
+   (seulement si le pays a un article) : texte orange sans bordure, la
+   flèche glisse vers la droite au survol. */
+.step p.voyage-suite,
+.step-display p.voyage-suite {
+  margin-top: 1.6rem;
+}
+
+.voyage-suite a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.voyage-suite a span {
+  transition: transform 0.2s ease;
+}
+
+.voyage-suite a:hover span,
+.voyage-suite a:focus-visible span {
+  transform: translateX(4px);
+}
+
 /* =========================================================
    PIED DE PAGE
    ========================================================= */
@@ -492,6 +521,128 @@ header .site-header-logo-img {
    visibles en même temps pendant que le scroll fait défiler le contenu
    et déclenche le changement d'étape.
    ========================================================= */
+/* =========================================================
+   FRISE CHRONOLOGIQUE (bord gauche, générée par buildTimeline)
+   Un petit trait orange par voyage ; celui du voyage en cours s'allonge
+   et son année s'affiche à côté (Space Mono), chiffres qui défilent.
+   Invisible tant qu'on est sur le hero.
+   ========================================================= */
+.frise {
+  position: fixed;
+  top: 50%;
+  left: max(1rem, env(safe-area-inset-left, 0px));
+  z-index: 6;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.frise.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.frise-ticks {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Le lien fait 18px de haut (zone facile à cliquer), le trait visible
+   est dessiné par ::before */
+.frise-tick {
+  position: relative;
+  display: block;
+  width: 26px;
+  height: 18px;
+}
+
+.frise-tick::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 9px;
+  height: 1.5px;
+  background: var(--primary);
+  opacity: 0.45;
+  transform: translateY(-50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+}
+
+.frise-tick:hover::before,
+.frise-tick:focus-visible::before {
+  opacity: 0.9;
+}
+
+.frise-tick.is-active::before {
+  width: 20px;
+  height: 3px;
+  opacity: 1;
+}
+
+.frise-annee {
+  position: absolute;
+  top: var(--y, 9px);
+  left: 32px;
+  display: flex;
+  height: 1em;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--primary);
+  transform: translateY(-50%);
+  transition: top 0.35s ease, opacity 0.3s ease;
+}
+
+.frise-annee.is-empty {
+  opacity: 0;
+}
+
+.frise-chiffre {
+  display: block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.frise-bande {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.6s cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+.frise-bande span {
+  display: block;
+  height: 1em;
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frise-bande,
+  .frise-annee,
+  .frise-tick::before {
+    transition: none;
+  }
+}
+
+/* Entre 821 et 1440px de large, la marge naturelle à gauche des sections
+   est trop étroite pour la frise : on lui réserve un peu de place. Les
+   colonnes rétrécissent un peu, donc les coordonnées GPS (sur une seule
+   ligne sinon) ont le droit de passer à la ligne si elles ne tiennent
+   plus — sans ça elles font déborder la page en largeur. */
+@media (min-width: 821px) and (max-width: 1440px) {
+  .destination {
+    padding-left: 5.5rem;
+  }
+
+  .step p.coords {
+    white-space: normal;
+  }
+}
+
 @media (max-width: 820px) {
   .site-header {
     padding: 1rem 1.2rem;
@@ -559,6 +710,11 @@ header .site-header-logo-img {
     height: 50vh;
     margin-top: 50vh;
     z-index: 2;
+    /* La photo n'est pas cliquable, mais sa zone (plus haute que la photo
+       visible) passe par-dessus le texte en fin de pays et bloquait le
+       clic sur le bouton « Voir la suite du voyage ». Les clics la
+       traversent donc. */
+    pointer-events: none;
   }
 
   .photo-frame {
@@ -578,6 +734,9 @@ header .site-header-logo-img {
      élément "collé" ne peut pas aussi servir de déclencheur de scroll. */
   .step {
     min-height: 50vh;
+    /* Invisible sur mobile mais placé par-dessus le texte affiché : sans
+       ça, il intercepte le clic sur « Voir la suite du voyage ». */
+    pointer-events: none;
   }
 
   .step h2,
@@ -615,9 +774,32 @@ header .site-header-logo-img {
     opacity: 1;
   }
 
+  /* Les copies de texte sont empilées au même endroit : celles qui sont
+     invisibles ne doivent pas bloquer les clics (ex. le lien « Lire
+     l'article ») de la copie visible. */
+  .step-display { pointer-events: none; }
+  .step-display.is-active { pointer-events: auto; }
+
   /* Les coordonnées restent sur une seule ligne sur grand écran, mais
      repassent à la ligne ici plutôt que de forcer la page à déborder. */
   .step-display p.coords {
     white-space: normal;
+  }
+
+  /* Frise sur mobile : collée au bord, traits plus courts ; l'année passe
+     au-dessus des traits pour ne pas couvrir le texte. */
+  .frise {
+    left: max(4px, env(safe-area-inset-left, 0px));
+  }
+
+  .frise-tick { width: 16px; }
+  .frise-tick::before { width: 6px; }
+  .frise-tick.is-active::before { width: 12px; height: 2.5px; }
+
+  .frise-annee {
+    top: -0.9rem;
+    left: 0;
+    font-size: 0.6rem;
+    transform: none;
   }
 }

@@ -95,6 +95,25 @@ foreach ((array) ($removed['photos'] ?? []) as $relativePath) {
     }
 }
 
+// Supprime aussi l'article du pays s'il existe (JSON + dossier de photos).
+// Le regex garantit que l'id est de la forme "costa-rica" : impossible de
+// viser un autre dossier avec un id piégé du type "../data".
+if (preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $id) === 1) {
+    $articleJson = DATA_DIR . "/articles/{$id}.json";
+    if (is_file($articleJson)) {
+        @unlink($articleJson);
+    }
+    $articleImgDir = ROOT_DIR . "/assets/articles/{$id}";
+    if (is_dir($articleImgDir)) {
+        foreach (scandir($articleImgDir) ?: [] as $entry) {
+            if ($entry !== '.' && $entry !== '..' && is_file("{$articleImgDir}/{$entry}")) {
+                @unlink("{$articleImgDir}/{$entry}");
+            }
+        }
+        @rmdir($articleImgDir);
+    }
+}
+
 $voyages = array_values(array_filter(
     $voyages,
     fn ($voyage) => ($voyage['id'] ?? null) !== $id

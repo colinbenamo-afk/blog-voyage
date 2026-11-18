@@ -2,7 +2,7 @@
   {
     "id": "caraibes",
     "pays": "Caraïbes",
-    "ordre_depart": "À COMPLÉTER",
+    "annee": 2025,
     "duree": "3 moins et demie",
     "transport": "voilier",
     "coordonnees": {
@@ -32,7 +32,7 @@
   {
     "id": "indonesie",
     "pays": "Indonésie",
-    "ordre_depart": "À COMPLÉTER",
+    "annee": 2023,
     "duree": "À COMPLÉTER",
     "transport": "À COMPLÉTER",
     "coordonnees": {
@@ -62,7 +62,7 @@
   {
     "id": "sri-lanka",
     "pays": "Sri Lanka",
-    "ordre_depart": "À COMPLÉTER",
+    "annee": null,
     "duree": "À COMPLÉTER",
     "transport": "À COMPLÉTER",
     "coordonnees": {
@@ -87,12 +87,13 @@
         "titre": "Retour vers l'océan",
         "texte": "Sur la côte sud, les pêcheurs sur échasses ferment la boucle du voyage. Une image simple, presque immobile, pour conclure trois destinations si différentes."
       }
-    ]
+    ],
+    "article": true
   },
   {
     "id": "italie",
     "pays": "Italie",
-    "ordre_depart": "2026-06-12",
+    "annee": 2026,
     "duree": "3 jours",
     "transport": "van",
     "coordonnees": {

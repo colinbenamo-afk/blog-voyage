@@ -1,0 +1,202 @@
+/* =========================================================
+   PAGE ARTICLE D'UN PAYS (pays.html)
+   Les couleurs, polices, fond et header viennent de style.css.
+   Ici : uniquement la mise en page de l'article.
+   ========================================================= */
+:root {
+  /* Ratio des photos (portrait 3:4) : une seule valeur à changer pour toute la page */
+  --ratio-photo: 3 / 4;
+}
+
+img { display: block; max-width: 100%; }
+
+.site-header-logo-link { display: inline-flex; }
+
+/* =========================================================
+   1. EN-TÊTE : titre + coordonnées sur une photo de fond
+   ========================================================= */
+.pays-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 4rem;
+}
+
+/* Photo de fond, assombrie pour garder le titre lisible. Le masque la fait
+   disparaître en douceur dans le fond du blog (au lieu d'un bord net). */
+.pays-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(rgba(9, 27, 32, 0.45), rgba(9, 27, 32, 0.45)),
+    var(--hero-photo, none) center / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+}
+
+.pays-hero h1 {
+  font-size: clamp(3rem, 11vw, 7rem);
+  line-height: 1.05;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);   /* lisibilité sur la photo */
+  overflow-wrap: anywhere;
+}
+
+.pays-hero .coords {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  color: var(--primary);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* =========================================================
+   2. BLOC INTRO : texte court + rangée de photos
+   ========================================================= */
+.bloc-intro {
+  padding: 2rem 0 5rem;
+  text-align: center;
+}
+
+.bloc-intro-texte {
+  max-width: 62ch;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+  font-size: 1.05rem;
+}
+
+/* Les paragraphes d'un texte (séparés par une ligne vide dans l'admin) */
+.bloc-intro-texte p + p,
+.bloc-texte p + p { margin-top: 1em; }
+
+/* Rangée de photos fixe (pas de carrousel) : toutes visibles en même temps,
+   légèrement superposées. La photo du milieu est la plus grande.
+   --n (nombre de photos) est posé par pays.js : la largeur s'adapte pour que
+   la rangée tienne dans l'écran, qu'il y ait 3 ou 7 photos. */
+.bande-piste {
+  --largeur-photo: clamp(70px, calc(88vw / (var(--n, 5) * 0.9)), 290px);
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.bande-photo {
+  flex: 0 0 var(--largeur-photo);
+  margin-inline: calc(var(--largeur-photo) * -0.1);   /* léger chevauchement */
+  transform: scale(var(--echelle, 0.8));
+  filter: brightness(var(--lumiere, 0.7));
+}
+/* Taille, luminosité et ordre d'empilement selon la distance au centre
+   (data-d = 0 pour la photo du milieu, 1 pour ses voisines, etc.) */
+.bande-photo[data-d="0"] { --echelle: 1.12; --lumiere: 1;    z-index: 5; }
+.bande-photo[data-d="1"] { --echelle: 0.92; --lumiere: 0.85; z-index: 4; }
+.bande-photo[data-d="2"] { --echelle: 0.78; --lumiere: 0.7;  z-index: 3; }
+.bande-photo[data-d="3"] { --echelle: 0.66; --lumiere: 0.6;  z-index: 2; }
+
+.bande-photo img {
+  width: 100%;
+  height: auto;                    /* sinon l'attribut height du HTML impose 600px et le ratio est ignoré */
+  aspect-ratio: var(--ratio-photo);
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 25px 50px -25px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================================================
+   3. BLOCS TEXTE + PHOTO (autant que nécessaire, côtés alternés)
+   ========================================================= */
+.bloc-texte-photo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;   /* la colonne photo est plus large que celle du texte */
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+}
+
+.bloc-texte {
+  text-align: center;
+  font-size: 1.05rem;
+  max-width: 38ch;
+  margin-inline: auto;
+}
+
+/* Version inversée : photo à gauche, texte à droite */
+.bloc-texte-photo--inverse { grid-template-columns: 1.15fr 0.85fr; }
+.bloc-texte-photo--inverse .bloc-texte { order: 2; }
+.bloc-texte-photo--inverse .photo-unique { order: 1; }
+
+.photo-unique {
+  width: min(100%, 480px);
+  margin-inline: auto;
+}
+.photo-unique img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--ratio-photo);
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 25px 50px -25px rgba(0, 0, 0, 0.8);
+}
+
+/* Message affiché si l'article n'existe pas / ne se charge pas */
+.pays-message {
+  max-width: 50ch;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+/* =========================================================
+   PIED DE PAGE
+   ========================================================= */
+.pays-footer {
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+  font-family: var(--font-mono);
+}
+.pays-footer a { color: var(--text); text-decoration: none; }
+.pays-footer a:hover, .pays-footer a:focus-visible { color: var(--primary); }
+
+/* =========================================================
+   APPARITION AU SCROLL (classe ajoutée par pays.js)
+   ========================================================= */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.est-visible { opacity: 1; transform: none; }
+
+/* Si l'utilisateur préfère moins d'animations, on les coupe */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* =========================================================
+   MOBILE : tout passe en une colonne, photo au-dessus du texte
+   ========================================================= */
+@media (max-width: 720px) {
+  /* Les photos de la rangée passent sur plusieurs lignes, sans chevauchement */
+  .bande-piste { flex-wrap: wrap; gap: 0.75rem; padding: 1rem 1.25rem; }
+  .bande-photo,
+  .bande-photo[data-d] {
+    flex: 0 0 calc(50% - 0.4rem);
+    margin-inline: 0;
+    --echelle: 1;
+    --lumiere: 1;
+  }
+
+  .bloc-texte-photo,
+  .bloc-texte-photo--inverse { grid-template-columns: 1fr; padding-bottom: 3rem; }
+  .bloc-texte-photo .photo-unique,
+  .bloc-texte-photo--inverse .photo-unique { order: 1; width: min(86vw, 400px); }
+  .bloc-texte-photo .bloc-texte,
+  .bloc-texte-photo--inverse .bloc-texte   { order: 2; }
+}

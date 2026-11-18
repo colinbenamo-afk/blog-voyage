@@ -1,14 +1,17 @@
-# Page admin (ajout / suppression de voyages)
+# Page admin (voyages et articles des pays)
 
 > À mettre à jour à chaque modification de cette section. Pour tout ce qui concerne la **sécurité** de cette page (mots de passe, connexion), voir `docs/securite.md` en détail — ce fichier-ci reste focalisé sur le fonctionnement de l'outil.
 
 ## Fichiers concernés
 
-- `admin/admin.php` — la page (formulaire d'ajout + liste "Voyages existants" avec suppression)
+- `admin/admin.php` — la page (formulaire d'ajout + liste "Voyages existants" avec suppression + éditeur d'article)
 - `admin/admin.js` — logique côté navigateur (formulaire d'ajout, chargement de la liste, suppression)
 - `admin/admin.css` — mise en page de la page admin
 - `admin/save-voyage.php` — écrit un nouveau voyage côté serveur
-- `admin/delete-voyage.php` — supprime un voyage (entrée + photos) côté serveur
+- `admin/delete-voyage.php` — supprime un voyage (entrée + photos + son article) côté serveur
+- `admin/admin-article.js` — éditeur d'article côté navigateur (voir ci-dessous)
+- `admin/save-article.php`, `admin/delete-article.php` — créent / modifient / suppriment l'article d'un pays côté serveur
+- `admin/common.php` — code partagé par les deux endpoints d'article (auth, réponses JSON, conversion WebP, écriture atomique)
 - `admin/login.php`, `admin/auth.php`, `admin/config.php` *(non versionné)* — connexion et secrets (détails dans `docs/securite.md`)
 
 ## Comment ça marche
@@ -17,6 +20,11 @@
 2. **Ajout** (`admin.php`) : pays, date de départ, durée, transport, coordonnées GPS, photo de couverture + 2 "moments forts" (titre, texte, photo chacun). L'id de la destination (`slug`, ex : `"Costa Rica"` → `"costa-rica"`) est calculé en direct à l'écriture du nom du pays, avec un avertissement si l'id existe déjà dans `data/voyages.json`. Validé côté navigateur (`admin.js`, retour immédiat) *et* côté serveur (`save-voyage.php`, la seule qui compte vraiment).
 3. **Enregistrement** (`save-voyage.php`) : vérifie le mot de passe + la session, valide tous les champs, convertit les 3 photos en WebP (via GD ; copie le fichier tel quel si l'hébergement ne supporte pas la conversion), écrit les photos dans `assets/images/`, puis **ajoute** (sans jamais supprimer) le nouveau voyage à `data/voyages.json`.
 4. **Suppression** : la section "Voyages existants" en haut de `admin.php` liste tous les voyages (chargés depuis `data/voyages.json` via `fetch`, comme pour l'aperçu d'id). Chaque voyage a un bouton "Supprimer" qui demande confirmation (`window.confirm`), puis envoie l'id + la clé d'accès à `delete-voyage.php`, qui retire l'entrée de `voyages.json` **et** supprime ses photos listées dans `photos` (pas en devinant un nom de fichier — lit les chemins réels). La liste se recharge automatiquement après un ajout ou une suppression réussie.
+5. **Articles des pays** (13 novembre) : chaque ligne de « Voyages existants » a un bouton « Créer l'article » (ou « Modifier l'article » + lien « Voir » si l'article existe). Il ouvre un panneau avec : titre, texte d'intro, photo du haut de page, galerie (3 à 7 photos), et des blocs texte + photo (0 à 20). Chaque liste a des boutons ↑ ↓ ✕ pour réordonner / retirer, et un bouton pour ajouter. Un compteur indique le nombre total de photos par rapport au minimum du cahier des charges (8).
+   - **Modifier** : l'article existant est rechargé ; une photo « actuelle » est conservée sauf si on choisit un autre fichier pour la remplacer.
+   - **Enregistrer** : le navigateur réduit d'abord chaque *nouvelle* photo (1600 px max, WebP — sinon 15 photos de téléphone dépasseraient la limite d'envoi du serveur), puis envoie tout en une requête à `save-article.php` : le texte en JSON (`payload`) + les nouvelles photos (`photo_s0`, `photo_s1`…). Le PHP valide tout, convertit les photos en WebP (1200 px max), écrit `data/articles/<id>.json`, ajoute `"article": true` au voyage, puis **supprime les anciennes photos devenues inutiles** (photo remplacée, retirée, bloc supprimé).
+   - **Supprimer l'article** (`delete-article.php`) retire le JSON, le dossier de photos et le drapeau `article` ; le voyage est conservé. Supprimer un *voyage* supprime aussi son article.
+   - Détail de la page publique : `docs/pays.md`.
 
 ## Historique / ce qu'on a fait
 
@@ -26,6 +34,8 @@
 - **6 octobre** : bug "Unexpected end of JSON input" lors de l'enregistrement — causé par une erreur de syntaxe PHP (`const` avec un appel de fonction), introduite pendant la sécurisation. Trouvée grâce à un test avec un vrai interpréteur PHP local (MAMP) plutôt qu'en devinant. Détail complet dans `docs/securite.md`.
 - **29 octobre** : **suppression de voyage ajoutée**. Nouvelle section "Voyages existants" dans `admin.php` (liste + bouton "Supprimer" par voyage) et nouvel endpoint `admin/delete-voyage.php`, même structure que `save-voyage.php` (auth, filet de sécurité JSON, clé d'accès). Testé de bout en bout (connexion, liste, suppression réussie, clé manquante, clé invalide) sur une copie isolée du projet avant tout déploiement, pour ne jamais risquer les vraies données pendant les tests.
 - **12 novembre** : `save-voyage.php` redimensionne les photos envoyées à 1200 px de large maximum avant la conversion WebP (`imagescale`). Une photo de téléphone de 4000 px passe ainsi de plusieurs centaines de Ko à quelques dizaines, sans différence visible sur le site. Les photos déjà plus petites ne sont pas touchées. Testé sur une copie isolée du projet.
+- **13 novembre** : **éditeur d'articles ajouté** (voir point 5 ci-dessus). Testé de bout en bout sur une copie isolée avec un vrai PHP 8.3 (`php -S`) et Playwright : création, modification (retirer / remplacer / réordonner), nettoyage des photos orphelines, suppression d'article, suppression de voyage en cascade, session absente, mauvaise clé, id piégé (`../data`), chemin de photo piégé (`../../data/voyages.json`), fichier qui n'est pas une image, envoi trop lourd (message clair au lieu d'une réponse vide), textes manquants, galerie hors limites.
+- **13 novembre** : le champ « Date de départ » est remplacé par « Année du voyage » (nombre entre 1900 et 2100, validé dans le navigateur et dans `save-voyage.php`). Le voyage est enregistré avec `annee` au lieu de `ordre_depart`, et le texte de la fiche pratique devient « En 2026, 3 jours en van. ». Testé sur une copie isolée (année valide acceptée, « abc » refusée).
 
 ## Points d'attention / pièges rencontrés
 
@@ -34,3 +44,7 @@
 - Les coordonnées GPS saisies ne sont validées côté serveur que pour leur format (nombre, plage -90/90 et -180/180) — une valeur dans la plage mais géographiquement fausse (ex : mauvais pays) ne sera pas détectée automatiquement. Voir `docs/hero.md` pour l'impact d'une coordonnée invalide sur la carte du hero.
 - Pas de linter/interpréteur PHP disponible par défaut dans cet environnement de développement — **MAMP** (déjà installé sur la machine) fournit plusieurs versions de PHP utilisables en ligne de commande (`/Applications/MAMP/bin/php/php8.3.30/bin/php`) pour tester (`-l` pour la syntaxe, `-S` pour un serveur local complet). À utiliser systématiquement avant de renvoyer du PHP sur l'hébergement, pour éviter de redécouvrir des bugs après coup.
 - **La suppression est irréversible** : `delete-voyage.php` ne passe pas par une corbeille, il réécrit directement `data/voyages.json` sans l'entrée et supprime ses fichiers photo. Toute modification ou test de ce script doit se faire sur une copie du projet (voir comment c'est fait dans l'historique ci-dessus), jamais directement avec `data/voyages.json` réel.
+- **Limite d'envoi du serveur** (`post_max_size`, souvent 8 Mo par défaut en local) : quand elle est dépassée, PHP vide `$_POST` et `$_FILES` sans prévenir. `common.php` le détecte et répond « les photos sont trop lourdes (limite : 8M) ». La réduction des photos côté navigateur (`admin-article.js`) évite normalement le problème ; si ça arrive quand même, enregistrer l'article en plusieurs fois (le premier enregistrement avec quelques photos, puis « Modifier » pour ajouter les autres).
+- **Chemins de photos « conservées »** : `save-article.php` n'accepte un `keep` que s'il a exactement la forme `assets/articles/<id>/<nom>.webp` ET que le fichier existe — impossible de lui faire lire ou garder un autre fichier du site.
+- **L'id d'un article est celui du voyage** (`voyages.json`) : on ne peut pas créer d'article pour un pays qui n'existe pas encore. Il faut d'abord créer le voyage.
+- `save-voyage.php` et `delete-voyage.php` ont gardé leur propre copie du code commun (filet de sécurité JSON, `fail()`…) ; seuls les endpoints d'article utilisent `common.php`. À factoriser plus tard si besoin, pas urgent.
