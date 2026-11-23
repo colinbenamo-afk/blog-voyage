@@ -11,11 +11,10 @@ requireAdminAuth();
   <title>Admin — Gérer les voyages et les articles</title>
 
   <!-- Mêmes polices que le site public -->
-  <link rel="preconnect" href="https://api.fontshare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://api.fontshare.com/v2/css?f[]=expose@400,500,700&f[]=bespoke-sans@400,500,700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
 
 
   <!-- style.css fournit les variables de couleurs/police du site ; admin.css

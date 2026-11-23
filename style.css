@@ -1,21 +1,21 @@
 /* =========================================================
    VARIABLES DE COULEURS
    Palette imposée + quelques teintes dérivées pour le hero
-   (fond sombre).
+   (thème clair depuis le 23 novembre).
    ========================================================= */
-:root {
-  --text: #efe7d0;
-  --background: #091b20;
+:root { 
+  --text: #091b20;
+  --background: #efe7d0;
   --primary: #D3621B;
   --accent: #889f71;
 
-  /* Teintes dérivées, utilisées uniquement pour le hero sombre */
-  --hero-bg-start: #0a1418;
-  --hero-bg-end: #10222a;
+  /* Teintes dérivées, utilisées uniquement pour le hero (clair) */
+  --hero-bg-start: #efe7d0;
+  --hero-bg-end: #fbf7ec;
   --text-muted: #305159a6; /* --text avec transparence, pour le texte inactif */
-  --font-titre: "Expose", system-ui, sans-serif;
+  --font-titre: "Melodrama", Georgia, serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
-  --font-texte: "Bespoke Sans", system-ui, sans-serif;
+  --font-texte: "Nunito", system-ui, sans-serif;
 }
 
 /* =========================================================
@@ -51,7 +51,12 @@ body::before {
   background-image: url("assets/background5.webp");
   background-size: cover;
   background-position: center;
-  opacity: 0.35;
+  /* L'image est noire avec des vagues claires : inversée puis multipliée
+     avec le crème, le fond reste crème et seules les vagues apparaissent,
+     en traits fins et discrets (avant : voile gris sur tout le site). */
+  filter: invert(1);
+  mix-blend-mode: multiply;
+  opacity: 0.6;
 }
 
 h1, h2 {
@@ -61,8 +66,8 @@ h1, h2 {
 
 /* =========================================================
    HEADER — barre de navigation fixe, au-dessus du hero
-   Fond translucide + flou : reste lisible sur le hero sombre
-   comme sur les sections blanches qui défilent en dessous.
+   Entièrement transparent (demandé le 23 novembre) : seuls le logo et
+   le menu flottent au-dessus de la page.
    ========================================================= */
 .site-header {
   position: fixed;
@@ -75,15 +80,16 @@ h1, h2 {
   justify-content: space-between;
   gap: 1.5rem;
   padding: 1.2rem 2rem;
-  background: rgba(10, 20, 24, 0.35);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: transparent;
 }
 
+/* Le logo est dessiné en crème (pour un fond sombre) : on le passe en
+   foncé pour qu'il reste lisible sur le header clair. */
 header .site-header-logo-img {
   height: 2.4rem;
   width: auto;
   object-fit: contain;
+  filter: brightness(0.15);
 }
 
 /* Liste déroulante des destinations : <details> natif, pas de JS requis
@@ -96,7 +102,7 @@ header .site-header-logo-img {
   cursor: pointer;
   list-style: none;
   font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
   font-size: 1.2rem;
   font-weight: 500;
   transition: color 0.2s ease;
@@ -118,7 +124,7 @@ header .site-header-logo-img {
 }
 
 .site-header-nav summary:hover {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .site-header-nav-list {
@@ -128,18 +134,18 @@ header .site-header-logo-img {
   min-width: 170px;
   list-style: none;
   padding: 0.5rem 0;
-  background: rgba(10, 20, 24, 0.95);
+  background: rgba(251, 247, 236, 0.97);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 10px;
-  box-shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 45px -20px rgba(9, 27, 32, 0.35);
 }
 
 .site-header-nav-list a {
   display: block;
   padding: 0.55rem 1.2rem;
   font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
   font-size: 1rem;
   font-weight: 500;
   text-decoration: none;
@@ -147,8 +153,8 @@ header .site-header-logo-img {
 }
 
 .site-header-nav-list a:hover {
-  color: var(--accent);
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--primary);
+  background: rgba(211, 98, 27, 0.08);
 }
 
 /* =========================================================
@@ -162,7 +168,6 @@ header .site-header-logo-img {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 30%, var(--hero-bg-end), var(--hero-bg-start));
   -webkit-mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
 }
@@ -237,7 +242,8 @@ header .site-header-logo-img {
   inset: 0;
   pointer-events: none;
   z-index: 2;
-  background: linear-gradient(180deg, rgba(10, 20, 24, 0.35) 0%, rgba(10, 20, 24, 0.75) 100%);
+  /* Voile crème léger au centre pour que le titre se détache du globe */
+  background: radial-gradient(ellipse at 50% 50%, rgba(251, 247, 236, 0.55) 0%, rgba(251, 247, 236, 0) 60%);
 }
 
 .hero-content {
@@ -316,17 +322,17 @@ header .site-header-logo-img {
 
 .photo-frame {
   position: relative;
-  width: 100%;
+  /* Un tiers plus petite que la colonne (23 novembre), centrée. */
+  width: 66.67%;
+  margin: 0 auto;
   aspect-ratio: 4 / 5;
-  max-height: 78vh;
+  max-height: 52vh;
   border-radius: 14px;
   overflow: hidden;
-  /* Fond plein, indépendant des photos qu'il contient : pendant les 2s de
-     fondu d'une photo (opacity/scale réduits le temps de la transition),
-     le cadre resterait sinon transparent par endroits, laissant voir le
-     texte derrière (sur mobile, le texte est juste en dessous en z-index). */
-  background-color: var(--background);
-  box-shadow: 0 30px 60px -20px rgba(48, 81, 89, 0.35);
+  /* Cadre transparent (demandé le 23 novembre) : plus de rectangle de
+     couleur visible derrière les photos pendant le fondu. L'ombre est
+     portée par la photo active elle-même (voir .photo.is-active). */
+  background: transparent;
 }
 
 /* Chaque photo est empilée dans le cadre ; au changement d'étape, la photo
@@ -347,7 +353,7 @@ header .site-header-logo-img {
   background-image: var(--photo-src);
   background-size: cover;
   background-position: center;
-  background-color: var(--background); /* couleur de secours tant que la photo n'a pas chargé */
+  border-radius: 14px;
   opacity: 0;
   transform: translateY(10%) scale(0.30);
   transition: opacity 2.0s cubic-bezier(0.22, 0.61, 0.36, 1),
@@ -365,6 +371,7 @@ header .site-header-logo-img {
   transform: translateY(0) scale(1);
   z-index: 3;
   filter: none;
+  box-shadow: 0 20px 40px -20px rgba(48, 81, 89, 0.35);
 }
 
 /* Photo pas encore atteinte : légèrement visible en dessous de l'active */
@@ -407,10 +414,13 @@ header .site-header-logo-img {
   display: none;
 }
 
-/* Espaceurs en haut/bas pour laisser à la première/dernière étape
-   le temps d'être bien centrée dans le viewport au déclenchement */
+/* Petits espaceurs en haut/bas de chaque pays. Ils faisaient 35vh : avec
+   la moitié vide de chaque .step (80vh, texte centré), ça laissait presque
+   un écran et demi vide entre deux pays. Réduits à 5vh (23 novembre) :
+   l'écart entre deux pays est maintenant proche de celui entre deux
+   textes d'un même pays. */
 .step-spacer {
-  height: 35vh;
+  height: 5vh;
 }
 
 .step {
@@ -432,7 +442,7 @@ header .site-header-logo-img {
 
 .step h2,
 .step-display h2 {
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
   font-weight: 800;
   margin-bottom: 1rem;
   color: var(--accent);
@@ -443,7 +453,7 @@ header .site-header-logo-img {
    titres (moments forts) gardent le style .step h2 ci-dessus. */
 .step[data-step="0"] h2,
 .step-display[data-step="0"] h2 {
-  font-size: clamp(3.5rem, 9vw, 7rem);
+  font-size: clamp(3rem, 7.5vw, 5.8rem);
   line-height: 0.9;
   text-transform: capitalize;
   color: var(--text);
@@ -453,7 +463,7 @@ header .site-header-logo-img {
 .step-display p {
   max-width: 46ch;
   font-weight: 400;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: var(--text);
 }
 
@@ -462,7 +472,7 @@ header .site-header-logo-img {
 .step p.coords,
 .step-display p.coords {
   font-family: var(--font-mono);
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--primary);
   margin-bottom: 0.6rem;
   max-width: none;
@@ -523,9 +533,10 @@ header .site-header-logo-img {
    ========================================================= */
 /* =========================================================
    FRISE CHRONOLOGIQUE (bord gauche, générée par buildTimeline)
-   Un petit trait orange par voyage ; celui du voyage en cours s'allonge
-   et son année s'affiche à côté (Space Mono), chiffres qui défilent.
-   Invisible tant qu'on est sur le hero.
+   Une roue vue de face : un trait orange + son année (Space Mono) par
+   voyage. Le voyage en cours est devant, en grand ; les autres
+   s'enroulent au-dessus et en dessous, plus pâles. La roue tourne au
+   changement de pays. Invisible tant qu'on est sur le hero.
    ========================================================= */
 .frise {
   position: fixed;
@@ -543,87 +554,99 @@ header .site-header-logo-img {
   pointer-events: auto;
 }
 
-.frise-ticks {
+/* La roue : chaque .frise-tick est posé sur un cylindre vu de face.
+   translateZ(-R) rotateX(angle) translateZ(R) = tourner autour de l'axe
+   de la roue ; l'angle vient de --pos (0 = devant, -1 = juste au-dessus,
+   +1 = juste en dessous…), posé par buildTimeline (script.js). La
+   transition sur transform fait tourner la roue d'un pays à l'autre. */
+.frise-roue {
+  --rayon: 186px;      /* diamètre ×3 le 23 novembre (62px avant) */
+  --angle: 18deg;      /* entre deux années ; doit valoir ANGLE dans script.js */
   position: relative;
-  display: flex;
-  flex-direction: column;
+  width: 80px;
+  height: calc(var(--rayon) * 2);
+  perspective: 900px;
 }
 
-/* Le lien fait 18px de haut (zone facile à cliquer), le trait visible
-   est dessiné par ::before */
 .frise-tick {
-  position: relative;
-  display: block;
-  width: 26px;
-  height: 18px;
-}
-
-.frise-tick::before {
-  content: '';
   position: absolute;
   top: 50%;
   left: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 22px;
+  margin-top: -11px;
+  text-decoration: none;
+  color: var(--primary);
+  transform: translateZ(calc(var(--rayon) * -1))
+             rotateX(calc(var(--pos, 0) * var(--angle) * -1))
+             translateZ(var(--rayon));
+  opacity: var(--opacite, 0);
+  backface-visibility: hidden;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+              opacity 0.7s ease;
+}
+/* --opacite est calculée en JS selon l'angle : plus on s'éloigne du
+   devant de la roue, plus c'est pâle. */
+.frise-tick.is-active { z-index: 3; }
+.frise-tick.is-cache { pointer-events: none; }
+
+/* Petits traits de graduation entre les années, sur la même roue */
+.frise-graduation {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 5px;
+  height: 1px;
+  margin-top: -0.5px;
+  background: var(--primary);
+  opacity: calc(var(--opacite, 0) * 0.5);
+  transform: translateZ(calc(var(--rayon) * -1))
+             rotateX(calc(var(--pos, 0) * var(--angle) * -1))
+             translateZ(var(--rayon));
+  backface-visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+              opacity 0.7s ease;
+}
+
+.frise-trait {
+  display: block;
   width: 9px;
   height: 1.5px;
-  background: var(--primary);
-  opacity: 0.45;
-  transform: translateY(-50%);
-  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  background: currentColor;
+  transition: width 0.4s ease, height 0.4s ease;
 }
 
-.frise-tick:hover::before,
-.frise-tick:focus-visible::before {
-  opacity: 0.9;
-}
-
-.frise-tick.is-active::before {
+.frise-tick.is-active .frise-trait {
   width: 20px;
   height: 3px;
-  opacity: 1;
 }
 
 .frise-annee {
-  position: absolute;
-  top: var(--y, 9px);
-  left: 32px;
-  display: flex;
-  height: 1em;
-  overflow: hidden;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1;
   letter-spacing: 0.03em;
-  color: var(--primary);
-  transform: translateY(-50%);
-  transition: top 0.35s ease, opacity 0.3s ease;
+  transition: font-size 0.4s ease;
 }
 
-.frise-annee.is-empty {
-  opacity: 0;
+.frise-tick.is-active .frise-annee {
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
-.frise-chiffre {
-  display: block;
-  height: 1em;
-  overflow: hidden;
-}
-
-.frise-bande {
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.6s cubic-bezier(0.22, 0.8, 0.24, 1);
-}
-
-.frise-bande span {
-  display: block;
-  height: 1em;
-  line-height: 1;
+.frise-tick:hover,
+.frise-tick:focus-visible {
+  --opacite: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frise-bande,
-  .frise-annee,
-  .frise-tick::before {
+  .frise-tick,
+  .frise-graduation,
+  .frise-trait,
+  .frise-annee {
     transition: none;
   }
 }
@@ -680,7 +703,6 @@ header .site-header-logo-img {
        destination en cours finir de défiler et disparaître complètement
        avant que ceux de la suivante n'entrent à l'écran. Sans ça, la fin
        d'une destination et le début de la suivante se chevauchent. */
-  
   }
 
   .steps-col,
@@ -709,6 +731,13 @@ header .site-header-logo-img {
     top: 50vh;
     height: 50vh;
     margin-top: 50vh;
+    /* Le texte (collé en haut) se décolle quand le bas de la grille
+       atteint le milieu de l'écran, la photo (collée en bas) quand il
+       atteint le bas : la photo partait un demi-écran trop tôt et
+       remontait par-dessus le texte. Cette marge négative la laisse
+       descendre 50vh plus bas dans la grille : les deux se décollent au
+       même moment et partent ensemble (23 novembre). */
+    margin-bottom: -50vh;
     z-index: 2;
     /* La photo n'est pas cliquable, mais sa zone (plus haute que la photo
        visible) passe par-dessus le texte en fin de pays et bloquait le
@@ -718,9 +747,9 @@ header .site-header-logo-img {
   }
 
   .photo-frame {
-    max-height: 44vh;
+    max-height: 30vh;
     aspect-ratio: auto;
-    height: 44vh;
+    height: 30vh;
   }
 
   .step-spacer {
@@ -786,20 +815,21 @@ header .site-header-logo-img {
     white-space: normal;
   }
 
-  /* Frise sur mobile : collée au bord, traits plus courts ; l'année passe
-     au-dessus des traits pour ne pas couvrir le texte. */
+  /* Frise sur mobile : collée au bord, roue plus petite. */
   .frise {
     left: max(4px, env(safe-area-inset-left, 0px));
   }
 
-  .frise-tick { width: 16px; }
-  .frise-tick::before { width: 6px; }
-  .frise-tick.is-active::before { width: 12px; height: 2.5px; }
-
-  .frise-annee {
-    top: -0.9rem;
-    left: 0;
-    font-size: 0.6rem;
-    transform: none;
+  /* Roue plus petite ; trait + année tiennent dans la marge à gauche du
+     texte (environ 40px) sans le chevaucher. */
+  .frise-roue {
+    --rayon: 138px;
+    width: 40px;
   }
+  .frise-graduation { width: 3px; }
+  .frise-tick { gap: 3px; height: 16px; margin-top: -8px; }
+  .frise-trait { width: 5px; }
+  .frise-tick.is-active .frise-trait { width: 9px; height: 2.5px; }
+  .frise-annee { font-size: 0.5rem; }
+  .frise-tick.is-active .frise-annee { font-size: 0.55rem; }
 }

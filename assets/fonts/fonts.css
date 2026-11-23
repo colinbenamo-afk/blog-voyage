@@ -1,0 +1,28 @@
+/* =========================================================
+   POLICES AUTO-HÉBERGÉES
+   - Melodrama (titres)  : police variable, graisses 300 à 700
+   - Nunito    (texte)   : police variable, graisses 200 à 1000
+   Space Mono (coordonnées, étiquettes) reste chargée via Google Fonts.
+
+   Une seule police variable par famille = un seul fichier à télécharger
+   (plus léger que 5 fichiers par graisse, et plus rapide pour Lighthouse).
+   font-display: swap affiche d'abord une police de secours, puis bascule
+   dès que la vraie police est chargée.
+   Les chemins sont relatifs à CE fichier (donc valables depuis l'accueil,
+   la page pays et l'admin).
+   ========================================================= */
+@font-face {
+  font-family: "Melodrama";
+  src: url("Melodrama-Variable.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: url("Nunito-Variable.woff2") format("woff2");
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}

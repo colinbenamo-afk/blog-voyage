@@ -27,11 +27,10 @@ if (isAdminAuthenticated()) {
   <meta name="robots" content="noindex, nofollow">
   <title>Connexion admin</title>
 
-  <link rel="preconnect" href="https://api.fontshare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://api.fontshare.com/v2/css?f[]=expose@400,500,700&f[]=bespoke-sans@400,500,700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
 
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="admin.css">

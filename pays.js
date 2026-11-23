@@ -104,23 +104,118 @@
     section.appendChild(texte);
 
     const photos = (article.galerie || []).filter(cheminPhotoValide);
-    if (photos.length) {
-      const piste = document.createElement('ul');
-      piste.className = 'bande-piste';
-      piste.style.setProperty('--n', String(photos.length));
-      const centre = Math.floor(photos.length / 2);
-      photos.forEach((chemin, i) => {
-        const li = document.createElement('li');
-        li.className = 'bande-photo';
-        li.dataset.d = String(Math.min(3, Math.abs(i - centre)));
-        li.appendChild(creerImage(chemin, `${paysNom} : photo ${i + 1} de la galerie`, true));
-        piste.appendChild(li);
-      });
-      const bande = document.createElement('div');
-      bande.appendChild(piste);
-      section.appendChild(bande);
-    }
+    if (photos.length) section.appendChild(construireCarrousel(photos, paysNom));
     return section;
+  }
+
+  /* --- Carrousel de la galerie ------------------------------------------
+     Les photos tournent en boucle autour de celle du milieu (la plus
+     grande). On le fait tourner avec les flèches, en glissant le doigt ou
+     la souris, avec les touches ← → du clavier, ou en cliquant une photo
+     sur le côté. Chaque photo reçoit sa position par rapport au centre
+     (--pos : 0 au centre, -1 à gauche, +1 à droite…) et le CSS fait le
+     reste (déplacement, taille, luminosité, animation). */
+  function construireCarrousel(photos, paysNom) {
+    const n = photos.length;
+    let actif = Math.floor(n / 2);
+
+    const bande = document.createElement('div');
+    bande.className = 'carrousel';
+    bande.setAttribute('role', 'region');
+    bande.setAttribute('aria-roledescription', 'carrousel');
+    bande.setAttribute('aria-label', `Galerie de photos : ${paysNom}`);
+
+    const piste = document.createElement('ul');
+    piste.className = 'bande-piste';
+    piste.tabIndex = 0;
+
+    const items = photos.map((chemin, i) => {
+      const li = document.createElement('li');
+      li.className = 'bande-photo';
+      li.appendChild(creerImage(chemin, `${paysNom} : photo ${i + 1} sur ${n}`, true));
+      li.addEventListener('click', () => {
+        if (glisse) return;           // un glisser n'est pas un clic
+        if (i !== actif) allerA(i);
+      });
+      piste.appendChild(li);
+      return li;
+    });
+
+    const nav = document.createElement('div');
+    nav.className = 'carrousel-nav';
+    const prec = document.createElement('button');
+    prec.type = 'button';
+    prec.className = 'carrousel-fleche';
+    prec.setAttribute('aria-label', 'Photo précédente');
+    prec.textContent = '←';
+    const compteur = document.createElement('span');
+    compteur.className = 'carrousel-compteur';
+    compteur.setAttribute('aria-live', 'polite');
+    const suiv = document.createElement('button');
+    suiv.type = 'button';
+    suiv.className = 'carrousel-fleche';
+    suiv.setAttribute('aria-label', 'Photo suivante');
+    suiv.textContent = '→';
+    nav.append(prec, compteur, suiv);
+
+    // Position d'une photo par rapport à la photo active, en boucle :
+    // avec 5 photos, la dernière est juste à gauche de la première.
+    function position(i) {
+      let d = i - actif;
+      if (d > n / 2) d -= n;
+      if (d < -n / 2) d += n;
+      return d;
+    }
+
+    function afficher() {
+      items.forEach((li, i) => {
+        const pos = position(i);
+        li.style.setProperty('--pos', String(pos));
+        li.dataset.d = String(Math.min(3, Math.abs(pos)));
+        li.classList.toggle('est-active', pos === 0);
+        li.setAttribute('aria-hidden', pos === 0 ? 'false' : 'true');
+      });
+      compteur.textContent = `${actif + 1} / ${n}`;
+    }
+
+    function allerA(i) {
+      actif = ((i % n) + n) % n;
+      afficher();
+    }
+
+    prec.addEventListener('click', () => allerA(actif - 1));
+    suiv.addEventListener('click', () => allerA(actif + 1));
+    piste.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); allerA(actif - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); allerA(actif + 1); }
+    });
+
+    // Glisser (doigt ou souris) : au-delà de 40px, on passe à la photo
+    // suivante / précédente. touch-action: pan-y (CSS) laisse le scroll
+    // vertical de la page fonctionner normalement.
+    let departX = null;
+    let glisse = false;
+    piste.addEventListener('pointerdown', (e) => {
+      departX = e.clientX;
+      glisse = false;
+    });
+    piste.addEventListener('pointermove', (e) => {
+      if (departX !== null && Math.abs(e.clientX - departX) > 10) glisse = true;
+    });
+    window.addEventListener('pointerup', (e) => {
+      if (departX === null) return;
+      const dx = e.clientX - departX;
+      departX = null;
+      if (Math.abs(dx) > 40) allerA(actif + (dx < 0 ? 1 : -1));
+      // le "click" qui suit le pointerup doit encore voir glisse = true
+      setTimeout(() => { glisse = false; }, 0);
+    });
+    piste.addEventListener('dragstart', (e) => e.preventDefault()); // pas de glisser natif des images
+
+    if (n < 2) nav.hidden = true;
+    afficher();
+    bande.append(piste, nav);
+    return bande;
   }
 
   function construireBloc(bloc, index, paysNom) {

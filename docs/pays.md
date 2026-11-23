@@ -39,6 +39,7 @@ Sur mobile (≤ 720 px) : la galerie passe sur 2 colonnes, chaque bloc devient u
 ```
 
 Et dans `data/voyages.json`, l'entrée du pays reçoit `"article": true` (ajouté/retiré automatiquement par l'admin) — c'est ce qui fait apparaître le lien sur l'accueil.
+- **Thème clair (23 novembre)** : le titre du pays sur la photo du haut passe en crème (`#fbf7ec`), il était foncé sur une photo assombrie donc presque illisible ; voile de la photo allégé (0.45 → 0.3).
 
 ## Points d'attention
 
@@ -49,3 +50,7 @@ Et dans `data/voyages.json`, l'entrée du pays reçoit `"article": true` (ajout�
 - **Cahier des charges** : minimum 8 photos par article (hero + galerie + blocs) — l'admin affiche un compteur, mais n'empêche pas d'enregistrer en dessous.
 - **Fond d'écran propre aux pages pays** : volontairement mis de côté pour l'instant (idées de fonds « strates » générées, pas utilisées).
 - Le dossier `page-pays/` (prototype indépendant) n'est plus utilisé : tout a été repris dans `pays.html`, `pays.css`, `pays.js`.
+
+- **23 novembre** : dégradé entre la photo du haut et le reste de l'article retiré (bord net).
+
+- **23 novembre : galerie en carrousel**. `construireCarrousel()` dans `pays.js` : toutes les photos sont empilées dans la même case de grille, chacune reçoit `--pos` (position par rapport à la photo active, calculée en boucle) et `data-d` (distance, 0 à 3). Le CSS (`.bande-photo`) en déduit le décalage (`translateX(--pos × --pas)`), la taille, la luminosité, et une transition anime le tout. Contrôles : boutons `.carrousel-fleche`, glisser (pointer events, seuil 40px, `touch-action: pan-y` pour garder le scroll vertical), ← → au clavier quand la galerie a le focus, clic sur une photo du côté. Le clic qui suit un glisser est ignoré.

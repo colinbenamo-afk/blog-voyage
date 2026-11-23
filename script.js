@@ -79,53 +79,62 @@
     frise.className = 'frise';
     frise.setAttribute('aria-label', 'Frise chronologique des voyages');
 
-    const ticksEl = document.createElement('div');
-    ticksEl.className = 'frise-ticks';
+    // La frise est une roue vue de face : chaque voyage (trait + année)
+    // est posé sur un cylindre. Le voyage en cours est devant, au centre ;
+    // les autres s'enroulent au-dessus et en dessous, de plus en plus
+    // petits et pâles. Au changement de pays, seule la variable --pos de
+    // chaque élément change (CSS) : la roue tourne en douceur.
+    const roue = document.createElement('div');
+    roue.className = 'frise-roue';
     const items = voyages.map((voyage) => {
       const annee = getAnnee(voyage);
       const tick = document.createElement('a');
       tick.className = 'frise-tick';
       tick.href = `#${voyage.id}`;
       tick.setAttribute('aria-label', annee ? `${voyage.pays} (${annee})` : voyage.pays);
-      ticksEl.appendChild(tick);
+      const trait = document.createElement('span');
+      trait.className = 'frise-trait';
+      const an = document.createElement('span');
+      an.className = 'frise-annee';
+      an.setAttribute('aria-hidden', 'true');
+      an.textContent = annee ? String(annee) : '—';
+      tick.append(trait, an);
+      roue.appendChild(tick);
       return { tick, annee, section: document.getElementById(voyage.id) };
     });
 
-    // L'année : 4 colonnes contenant chacune les chiffres 0 à 9 empilés.
-    // Afficher un chiffre = faire glisser sa colonne verticalement (CSS),
-    // d'où l'effet de compteur qui défile.
-    const label = document.createElement('span');
-    label.className = 'frise-annee';
-    label.setAttribute('aria-hidden', 'true');
-    const strips = [];
-    for (let i = 0; i < 4; i += 1) {
-      const col = document.createElement('span');
-      col.className = 'frise-chiffre';
-      const strip = document.createElement('span');
-      strip.className = 'frise-bande';
-      for (let d = 0; d <= 9; d += 1) {
-        const digit = document.createElement('span');
-        digit.textContent = d;
-        strip.appendChild(digit);
+    // Petits traits de graduation entre deux années (comme une règle),
+    // et quelques-uns avant la première / après la dernière pour que la
+    // roue paraisse continue. Leur position est fractionnaire (ex. 0.25).
+    const GRADUATIONS = 3; // traits entre deux années
+    const graduations = [];
+    for (let i = -2; i < items.length + 1; i += 1) {
+      for (let j = 1; j <= GRADUATIONS; j += 1) {
+        const g = document.createElement('span');
+        g.className = 'frise-graduation';
+        g.setAttribute('aria-hidden', 'true');
+        roue.appendChild(g);
+        graduations.push({ el: g, index: i + j / (GRADUATIONS + 1) });
       }
-      col.appendChild(strip);
-      label.appendChild(col);
-      strips.push(strip);
     }
-    ticksEl.appendChild(label);
 
-    frise.appendChild(ticksEl);
+    frise.appendChild(roue);
     document.body.appendChild(frise);
 
-    let current = null;
-
-    function showYear(annee) {
-      label.classList.toggle('is-empty', annee === null);
-      if (annee === null) return;
-      String(annee).padStart(4, '0').split('').forEach((digit, i) => {
-        strips[i].style.transform = `translateY(${-Number(digit)}em)`;
-      });
+    // Visibilité selon l'angle sur la roue : 1 devant, 0 sur le côté
+    // (vu de face, ce qui part derrière la roue disparaît).
+    const ANGLE = 18; // degrés entre deux années, doit valoir --angle (CSS)
+    function visibilite(pos) {
+      const c = Math.cos((Math.abs(pos) * ANGLE * Math.PI) / 180);
+      return Math.max(0, Math.min(1, (c - 0.2) / 0.8)) ** 1.4;
     }
+
+    function placer(el, pos) {
+      el.style.setProperty('--pos', String(pos));
+      el.style.setProperty('--opacite', visibilite(pos).toFixed(3));
+    }
+
+    let current = null;
 
     function update() {
       const reference = window.scrollY + window.innerHeight * 0.5;
@@ -137,10 +146,14 @@
         if (item.section && reference >= item.section.offsetTop) active = item;
       });
       if (active === current) return;
-      current?.tick.classList.remove('is-active');
-      active.tick.classList.add('is-active');
-      label.style.setProperty('--y', `${active.tick.offsetTop + active.tick.offsetHeight / 2}px`);
-      showYear(active.annee);
+      const indexActif = items.indexOf(active);
+      items.forEach((item, i) => {
+        const pos = i - indexActif;
+        placer(item.tick, pos);
+        item.tick.classList.toggle('is-active', pos === 0);
+        item.tick.classList.toggle('is-cache', visibilite(pos) < 0.1);
+      });
+      graduations.forEach((g) => placer(g.el, g.index - indexActif));
       current = active;
     }
 
@@ -391,13 +404,12 @@
       return;
     }
 
-    // Couleur de l'océan : même teinte que l'ancienne carte 2D (tuiles OSM
-    // + filtre invert/hue-rotate), pour garder l'identité visuelle du site.
+    // Couleurs claires (thème clair) : océan bleu-vert doux, terres crème.
     try {
       const mat = myGlobe.globeMaterial();
-      mat.color.set('#12262d');
-      mat.emissive.set('#0a1418');
-      mat.emissiveIntensity = 0.35;
+      mat.color.set('#bfdad6');
+      mat.emissive.set('#a9cbc6');
+      mat.emissiveIntensity = 0.45;
     } catch (e) {}
 
     try {
@@ -407,17 +419,16 @@
     // Frontières des pays, chargées à part (fichier de ~165 Ko) plutôt que
     // mises en dur ici. Isolé dans son propre .catch : si le fichier ne
     // charge pas, le globe uni (sans pays) reste quand même utilisable.
-    // Remplissage terre quasi identique à l'océan (comme sur la carte 2D
-    // d'origine) ; ligne de frontière fine et peu lumineuse (sage à faible
-    // opacité), pas une bordure épaisse.
+    // Terres crème sur océan bleu-vert clair ; frontières fines en vert
+    // sauge, pas une bordure épaisse.
     fetch('data/countries.geojson')
       .then((res) => res.json())
       .then((countries) => {
         myGlobe
           .polygonsData(countries.features)
-          .polygonCapColor(() => '#121616')
-          .polygonSideColor(() => '#0a0c0c')
-          .polygonStrokeColor(() => 'rgba(136, 159, 113, 0.35)')
+          .polygonCapColor(() => '#f6efdc')
+          .polygonSideColor(() => '#e4d9bb')
+          .polygonStrokeColor(() => 'rgba(136, 159, 113, 0.7)')
           .polygonAltitude(0.006);
       })
       .catch((err) => console.warn('Impossible de charger data/countries.geojson :', err));
