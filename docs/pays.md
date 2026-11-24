@@ -17,7 +17,7 @@ Chaque pays peut avoir un **article** : une page plus visuelle (beaucoup de phot
 ## Structure d'une page article
 
 1. **En-tête** : photo plein cadre en fond (assombrie, qui se fond dans le fond du blog), titre de l'article en grand, coordonnées GPS du pays (lues dans `voyages.json`).
-2. **Bloc intro** : texte d'introduction + **galerie** de 3 à 7 photos fixes (pas de carrousel). La photo du milieu est la plus grande, les autres rétrécissent et s'assombrissent en s'éloignant (attribut `data-d` = distance au centre, posé par `pays.js`). La largeur des photos s'adapte au nombre de photos (`--n`).
+2. **Bloc intro** : texte d'introduction + **galerie** en carrousel : 3 photos minimum, **aucun maximum** (depuis le 24 novembre). Le carrousel s'ouvre sur la photo du milieu et tourne en boucle ; seules les photos proches du centre sont visibles (attribut `data-d` = distance au centre, posé par `pays.js`), donc 50 photos ne pèsent pas plus sur la mise en page que 5.
 3. **Blocs texte + photo** (0 à 20) : texte d'un côté, une photo plus grande de l'autre. Le côté alterne automatiquement (le 2e bloc est inversé, etc.).
 4. Pied de page : retour au voyage sur l'accueil.
 

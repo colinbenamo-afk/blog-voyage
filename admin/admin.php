@@ -28,11 +28,8 @@ requireAdminAuth();
 
   <h1 class="admin-title">Gérer les voyages</h1>
   <p class="admin-intro">
-    Outil interne pour ajouter ou supprimer un voyage dans <code>data/voyages.json</code>
-    et ses photos dans <code>assets/images/</code>, et pour écrire l'article de chaque pays
-    (<code>data/articles/</code>), sans éditeur de code. Passe par
-    <code>save-voyage.php</code>, <code>delete-voyage.php</code>, <code>save-article.php</code> et
-    <code>delete-article.php</code> côté serveur (fonctionne sur n'importe quel hébergement PHP).
+    Ici, tu ajoutes un voyage, tu écris l'article d'un pays ou tu supprimes un voyage,
+    sans toucher au code. Les changements s'appliquent directement au site.
     Cette page n'est pas liée depuis le site public.
   </p>
 
@@ -41,10 +38,9 @@ requireAdminAuth();
   <!-- ============================================ -->
   <section class="admin-panel">
     <h2>Voyages existants</h2>
-    <p class="admin-intro" style="margin-bottom: 1rem;">
-      « Créer l'article » / « Modifier l'article » ouvre l'éditeur de l'article du pays.
-      Supprimer un voyage retire son entrée de <code>data/voyages.json</code>,
-      ses photos dans <code>assets/images/</code> et son article. Irréversible.
+    <p class="admin-intro">
+      « Créer l'article » ou « Modifier l'article » ouvre l'éditeur de l'article du pays.
+      Attention : supprimer un voyage supprime aussi ses photos et son article, et c'est irréversible.
     </p>
     <div class="field">
       <label for="delete-access-key">Clé d'accès admin</label>
@@ -55,6 +51,99 @@ requireAdminAuth();
   </section>
 
   <!-- ============================================ -->
+  <!-- MODIFIER UN VOYAGE (caché tant qu'on n'a pas   -->
+  <!-- cliqué sur « Modifier le voyage »)             -->
+  <!-- Rempli et géré par admin-voyage.js             -->
+  <!-- ============================================ -->
+  <section id="voyage-edit-panel" class="admin-panel hidden">
+    <h2 id="voyage-edit-heading">Modifier le voyage</h2>
+    <p class="admin-intro">
+      Change ce que tu veux : ce que tu ne touches pas reste comme avant.
+      L'article du pays se modifie avec « Modifier l'article ».
+    </p>
+
+    <div class="field">
+      <label for="ve-key">Clé d'accès admin</label>
+      <input type="password" id="ve-key" autocomplete="off">
+    </div>
+
+    <h3 class="admin-subheading">Informations du voyage</h3>
+    <div class="field">
+      <label for="ve-pays">Pays / destination</label>
+      <input type="text" id="ve-pays">
+      <span class="id-preview">id (ne change jamais, même si tu renommes le pays) : <strong id="ve-id">—</strong></span>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="ve-annee">Année du voyage</label>
+        <input type="number" id="ve-annee" min="1900" max="2100" step="1">
+      </div>
+      <div class="field">
+        <label for="ve-duree">Durée</label>
+        <input type="text" id="ve-duree" placeholder="ex : 6 semaines">
+      </div>
+    </div>
+    <div class="field">
+      <label for="ve-transport">Mode de transport</label>
+      <select id="ve-transport">
+        <option value="" disabled>Choisir…</option>
+        <option value="sac à dos">Sac à dos</option>
+        <option value="vélo">Vélo</option>
+        <option value="voilier">Voilier</option>
+        <option value="van">Van</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="ve-lat">Latitude</label>
+        <input type="number" id="ve-lat" step="any">
+      </div>
+      <div class="field">
+        <label for="ve-lon">Longitude</label>
+        <input type="number" id="ve-lon" step="any">
+      </div>
+    </div>
+
+    <h3 class="admin-subheading">Texte et photo du pays (premier écran)</h3>
+    <div class="field">
+      <label for="ve-intro">Texte affiché sous le nom du pays (vide = « En 2026, 6 semaines en van. »)</label>
+      <textarea id="ve-intro"></textarea>
+    </div>
+    <div id="ve-photo-0"></div>
+
+    <h3 class="admin-subheading">Moment fort n°1</h3>
+    <div class="field">
+      <label for="ve-m1-titre">Titre</label>
+      <input type="text" id="ve-m1-titre">
+    </div>
+    <div class="field">
+      <label for="ve-m1-texte">Texte</label>
+      <textarea id="ve-m1-texte"></textarea>
+    </div>
+    <div id="ve-photo-1"></div>
+
+    <h3 class="admin-subheading">Moment fort n°2</h3>
+    <div class="field">
+      <label for="ve-m2-titre">Titre</label>
+      <input type="text" id="ve-m2-titre">
+    </div>
+    <div class="field">
+      <label for="ve-m2-texte">Texte</label>
+      <textarea id="ve-m2-texte"></textarea>
+    </div>
+    <div id="ve-photo-2"></div>
+
+    <ul id="ve-error-list" class="error-list hidden"></ul>
+    <p id="ve-status-line" class="status-line hidden"></p>
+
+    <div class="article-actions">
+      <button type="button" id="ve-save">Enregistrer les modifications</button>
+      <button type="button" id="ve-close" class="btn-secondary">Fermer</button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
   <!-- ÉDITEUR D'ARTICLE (caché tant qu'on n'a pas    -->
   <!-- cliqué sur « Créer/Modifier l'article »)       -->
   <!-- Tout le contenu dynamique est généré par       -->
@@ -62,9 +151,9 @@ requireAdminAuth();
   <!-- ============================================ -->
   <section id="article-panel" class="admin-panel hidden">
     <h2 id="article-heading">Article</h2>
-    <p class="admin-intro" style="margin-bottom: 1rem;">
-      L'article s'affiche sur <code>pays.html</code>. Les photos sont réduites puis converties en WebP
-      automatiquement. Dans les textes, une ligne vide crée un nouveau paragraphe.
+    <p class="admin-intro">
+      Les photos sont réduites et converties automatiquement. Dans les textes,
+      une ligne vide crée un nouveau paragraphe.
     </p>
 
     <div class="field">
@@ -85,7 +174,14 @@ requireAdminAuth();
     <h3 class="article-subheading">Photo du haut de page</h3>
     <div id="article-hero"></div>
 
-    <h3 class="article-subheading">Galerie (3 à 7 photos, la photo du milieu est mise en avant)</h3>
+    <h3 class="article-subheading">Galerie (3 photos minimum, autant que tu veux ; le carrousel s'ouvre sur la photo du milieu)</h3>
+    <!-- Zone de dépôt : on peut y glisser plusieurs photos ou un dossier entier -->
+    <div id="article-galerie-drop" class="dropzone" tabindex="0" role="button">
+      Glisse ici tes photos ou un dossier entier<br>
+      <span class="dropzone-hint">ou clique pour choisir plusieurs photos</span>
+      <input type="file" id="article-galerie-files" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+    </div>
+    <p id="article-galerie-msg" class="status-line hidden"></p>
     <div id="article-galerie"></div>
     <button type="button" id="article-galerie-add" class="btn-secondary">+ Ajouter une photo</button>
 
@@ -109,13 +205,13 @@ requireAdminAuth();
   <!-- FORMULAIRE DU VOYAGE                          -->
   <!-- ============================================ -->
   <form id="voyage-form" class="admin-panel" novalidate>
-    <h2>Accès</h2>
+    <h2>Ajouter un voyage</h2>
     <div class="field">
       <label for="access-key">Clé d'accès admin</label>
       <input type="password" id="access-key" name="access-key" autocomplete="off" required>
     </div>
 
-    <h2>Informations du voyage</h2>
+    <h3 class="admin-subheading">Informations du voyage</h3>
 
     <div class="field">
       <label for="pays">Pays / destination</label>
@@ -162,7 +258,7 @@ requireAdminAuth();
       <input type="file" id="cover-photo" name="cover-photo" accept="image/*" required>
     </div>
 
-    <h2 class="admin-subheading">Moment fort n°1</h2>
+    <h3 class="admin-subheading">Moment fort n°1</h3>
     <div class="field">
       <label for="moment1-titre">Titre</label>
       <input type="text" id="moment1-titre" name="moment1-titre" required>
@@ -176,7 +272,7 @@ requireAdminAuth();
       <input type="file" id="moment1-photo" name="moment1-photo" accept="image/*" required>
     </div>
 
-    <h2 class="admin-subheading">Moment fort n°2</h2>
+    <h3 class="admin-subheading">Moment fort n°2</h3>
     <div class="field">
       <label for="moment2-titre">Titre</label>
       <input type="text" id="moment2-titre" name="moment2-titre" required>
@@ -198,5 +294,6 @@ requireAdminAuth();
 
   <script src="admin.js"></script>
   <script src="admin-article.js"></script>
+  <script src="admin-voyage.js"></script>
 </body>
 </html>

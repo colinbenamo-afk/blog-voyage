@@ -1,123 +1,123 @@
 [
-  {
-    "id": "caraibes",
-    "pays": "Caraïbes",
-    "annee": 2025,
-    "duree": "3 moins et demie",
-    "transport": "voilier",
-    "coordonnees": {
-      "lat": 16.265,
-      "lon": -61.551
+    {
+        "id": "caraibes",
+        "pays": "Caraïbes",
+        "annee": 2025,
+        "duree": "3 moins et demie",
+        "transport": "voilier",
+        "coordonnees": {
+            "lat": 16.265,
+            "lon": -61.551
+        },
+        "photos": [
+            "assets/images/caraibes-1.webp",
+            "assets/images/caraibes-2.webp",
+            "assets/images/caraibes-3.webp"
+        ],
+        "sections": [
+            {
+                "titre": "Caraïbes",
+                "texte": "3 moins et demie sur Gypsy Soul, depuis les Bahames jusqu'en Martinique!"
+            },
+            {
+                "titre": "Vie de village",
+                "texte": "Entre les cocotiers, les maisons colorées racontent une autre histoire : celle d'une culture métissée, faite de musique, d'épices et d'un accueil désarmant de simplicité."
+            },
+            {
+                "titre": "Coucher de soleil",
+                "texte": "Chaque soir, le ciel s'embrase au-dessus de la mer des Caraïbes. Un rituel immuable qui rassemble locaux et voyageurs sur la même plage, sans un mot."
+            }
+        ]
     },
-    "photos": [
-      "assets/images/caraibes-1.webp",
-      "assets/images/caraibes-2.webp",
-      "assets/images/caraibes-3.webp"
-    ],
-    "sections": [
-      {
-        "titre": "Caraïbes",
-        "texte": "3 moins et demie sur Gypsy Soul, depuis les Bahames jusqu'en Martinique!"
-      },
-      {
-        "titre": "Vie de village",
-        "texte": "Entre les cocotiers, les maisons colorées racontent une autre histoire : celle d'une culture métissée, faite de musique, d'épices et d'un accueil désarmant de simplicité."
-      },
-      {
-        "titre": "Coucher de soleil",
-        "texte": "Chaque soir, le ciel s'embrase au-dessus de la mer des Caraïbes. Un rituel immuable qui rassemble locaux et voyageurs sur la même plage, sans un mot."
-      }
-    ]
-  },
-  {
-    "id": "indonesie",
-    "pays": "Indonésie",
-    "annee": 2023,
-    "duree": "À COMPLÉTER",
-    "transport": "À COMPLÉTER",
-    "coordonnees": {
-      "lat": -8.5069,
-      "lon": 115.2625
+    {
+        "id": "indonesie",
+        "pays": "Indonésie",
+        "annee": 2023,
+        "duree": "À COMPLÉTER",
+        "transport": "À COMPLÉTER",
+        "coordonnees": {
+            "lat": -8.5069,
+            "lon": 115.2625
+        },
+        "photos": [
+            "assets/images/indonesie-1.webp",
+            "assets/images/indonesie-2.webp",
+            "assets/images/indonesie-3.webp"
+        ],
+        "sections": [
+            {
+                "titre": "Indonésie",
+                "texte": "Un archipel de plus de dix-sept mille îles où chaque traversée en bateau dévoile un paysage différent : rizières en terrasses, volcans fumants, fonds marins spectaculaires."
+            },
+            {
+                "titre": "Rizières de Bali",
+                "texte": "À Ubud, les rizières en escalier dessinent des vagues de vert. Le matin, la brume s'accroche encore aux collines pendant que les fermiers commencent leur journée."
+            },
+            {
+                "titre": "Temples et volcans",
+                "texte": "Au lever du jour, le sommet du Bromo perce la mer de nuages. Un silence minéral, seulement troublé par le souffle du volcan encore actif."
+            }
+        ]
     },
-    "photos": [
-      "assets/images/indonesie-1.webp",
-      "assets/images/indonesie-2.webp",
-      "assets/images/indonesie-3.webp"
-    ],
-    "sections": [
-      {
-        "titre": "Indonésie",
-        "texte": "Un archipel de plus de dix-sept mille îles où chaque traversée en bateau dévoile un paysage différent : rizières en terrasses, volcans fumants, fonds marins spectaculaires."
-      },
-      {
-        "titre": "Rizières de Bali",
-        "texte": "À Ubud, les rizières en escalier dessinent des vagues de vert. Le matin, la brume s'accroche encore aux collines pendant que les fermiers commencent leur journée."
-      },
-      {
-        "titre": "Temples et volcans",
-        "texte": "Au lever du jour, le sommet du Bromo perce la mer de nuages. Un silence minéral, seulement troublé par le souffle du volcan encore actif."
-      }
-    ]
-  },
-  {
-    "id": "sri-lanka",
-    "pays": "Sri Lanka",
-    "annee": null,
-    "duree": "À COMPLÉTER",
-    "transport": "À COMPLÉTER",
-    "coordonnees": {
-      "lat": 7.2906,
-      "lon": 80.6337
+    {
+        "id": "sri-lanka",
+        "pays": "Sri Lanka",
+        "annee": 2023,
+        "duree": "3 semaines",
+        "transport": "sac à dos",
+        "coordonnees": {
+            "lat": 7.2906,
+            "lon": 80.6337
+        },
+        "photos": [
+            "assets/images/sri-lanka-1-a779a3d8.webp",
+            "assets/images/sri-lanka-2-067a4134.webp",
+            "assets/images/sri-lanka-3-31d6084d.webp"
+        ],
+        "sections": [
+            {
+                "titre": "Sri Lanka",
+                "texte": "Le Sri Lanka est un pays où les gens sont super sympas et les paysages magnifiques. On croise des animaux sauvages partout où l'on va, surtout de nuit.\r\nCe pays est vraiment un énorme coup de cœur pour moi, je pourrais presque y vivre !"
+            },
+            {
+                "titre": "Se déplacer",
+                "texte": "Train, bus, tuk-tuk : les transports locaux marchent très bien et ne coûtent vraiment pas cher. Sur place, on loue un scooter pour environ 5 CHF par jour."
+            },
+            {
+                "titre": "Le surf",
+                "texte": "Arugam Bay et Mirissa sont les deux spots de surf phares du Sri Lanka : c'est là qu'on trouve les meilleures vagues, surtout pour le longboard. En été, on surfe à l'est, à Arugam Bay. En hiver, direction le sud de l'île, à Mirissa."
+            }
+        ],
+        "article": true
     },
-    "photos": [
-      "assets/images/sri-lanka-1.webp",
-      "assets/images/sri-lanka-2.webp",
-      "assets/images/sri-lanka-3.webp"
-    ],
-    "sections": [
-      {
-        "titre": "Sri Lanka",
-        "texte": "Dernière étape du voyage : une île dense où jungle, plantations de thé et plages désertes se succèdent en quelques heures de train seulement."
-      },
-      {
-        "titre": "Train des hauteurs",
-        "texte": "Le trajet entre Kandy et Ella, portes ouvertes, jambes dans le vide, reste le plus beau souvenir de train du voyage. Le vert des plantations défile à perte de vue."
-      },
-      {
-        "titre": "Retour vers l'océan",
-        "texte": "Sur la côte sud, les pêcheurs sur échasses ferment la boucle du voyage. Une image simple, presque immobile, pour conclure trois destinations si différentes."
-      }
-    ],
-    "article": true
-  },
-  {
-    "id": "italie",
-    "pays": "Italie",
-    "annee": 2026,
-    "duree": "3 jours",
-    "transport": "van",
-    "coordonnees": {
-      "lat": 44.3593,
-      "lon": 8.5753
-    },
-    "photos": [
-      "assets/images/italie-1.webp",
-      "assets/images/italie-2.webp",
-      "assets/images/italie-1.webp"
-    ],
-    "sections": [
-      {
-        "titre": "Italie",
-        "texte": "Départ le 12 juin 2026, 3 jours, en van."
-      },
-      {
-        "titre": "Surf",
-        "texte": "Surfer des super vagues le soir sous la pluie"
-      },
-      {
-        "titre": "Skate",
-        "texte": "Faire du skate dans un skate park au bord de l'eau"
-      }
-    ]
-  }
+    {
+        "id": "italie",
+        "pays": "Italie",
+        "annee": 2026,
+        "duree": "3 jours",
+        "transport": "van",
+        "coordonnees": {
+            "lat": 44.3593,
+            "lon": 8.5753
+        },
+        "photos": [
+            "assets/images/italie-1.webp",
+            "assets/images/italie-2.webp",
+            "assets/images/italie-1.webp"
+        ],
+        "sections": [
+            {
+                "titre": "Italie",
+                "texte": "Départ le 12 juin 2026, 3 jours, en van."
+            },
+            {
+                "titre": "Surf",
+                "texte": "Surfer des super vagues le soir sous la pluie"
+            },
+            {
+                "titre": "Skate",
+                "texte": "Faire du skate dans un skate park au bord de l'eau"
+            }
+        ]
+    }
 ]

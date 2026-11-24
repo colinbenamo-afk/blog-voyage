@@ -124,8 +124,8 @@ if ($intro === '') {
 }
 
 $galerie = $payload['galerie'] ?? null;
-if (!is_array($galerie) || count($galerie) < GALERIE_MIN || count($galerie) > GALERIE_MAX) {
-    $errors[] = 'La galerie doit contenir entre ' . GALERIE_MIN . ' et ' . GALERIE_MAX . ' photos.';
+if (!is_array($galerie) || count($galerie) < GALERIE_MIN) {
+    $errors[] = 'La galerie doit contenir au moins ' . GALERIE_MIN . ' photos.';
     $galerie = [];
 }
 

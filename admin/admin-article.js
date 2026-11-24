@@ -18,7 +18,7 @@
   'use strict';
 
   const GALERIE_MIN = 3;
-  const GALERIE_MAX = 7;
+  const NOUVELLES_PHOTOS_MAX = 20; // PHP n'accepte par défaut que 20 fichiers par envoi (max_file_uploads)
   const BLOCS_MAX = 20;
   const PHOTOS_CDC = 8;        // minimum de photos demandé par le cahier des charges
   const ENVOI_MAX_COTE = 1600; // côté max (px) des photos avant envoi
@@ -33,6 +33,9 @@
   const galerieHost = $('article-galerie');
   const blocsHost = $('article-blocs');
   const galerieAddBtn = $('article-galerie-add');
+  const dropZone = $('article-galerie-drop');
+  const dropInput = $('article-galerie-files');
+  const dropMsg = $('article-galerie-msg');
   const blocAddBtn = $('article-bloc-add');
   const countEl = $('article-photo-count');
   const errorListEl = $('article-error-list');
@@ -194,7 +197,6 @@
       }));
       galerieHost.appendChild(row);
     });
-    galerieAddBtn.disabled = state.galerie.length >= GALERIE_MAX;
   }
 
   function renderBlocs() {
@@ -244,6 +246,7 @@
   async function ouvrir(voyage) {
     showErrors([]);
     setStatus('', null);
+    dropMsg.classList.add('hidden');
     await chargerEtat(voyage);
 
     titreInput.value = state.titre;
@@ -313,8 +316,8 @@
     if (!state.titre.trim()) erreurs.push("Le titre de l'article est obligatoire.");
     if (!state.intro.trim()) erreurs.push("Le texte d'introduction est obligatoire.");
     if (!slotRempli(state.hero)) erreurs.push('La photo du haut de page est obligatoire.');
-    if (state.galerie.length < GALERIE_MIN || state.galerie.length > GALERIE_MAX) {
-      erreurs.push(`La galerie doit contenir entre ${GALERIE_MIN} et ${GALERIE_MAX} photos.`);
+    if (state.galerie.length < GALERIE_MIN) {
+      erreurs.push(`La galerie doit contenir au moins ${GALERIE_MIN} photos.`);
     }
     state.galerie.forEach((slot, i) => {
       if (!slotRempli(slot)) erreurs.push(`Galerie : la photo n°${i + 1} n'est pas choisie.`);
@@ -323,6 +326,13 @@
       if (!bloc.texte.trim()) erreurs.push(`Bloc n°${i + 1} : le texte est obligatoire.`);
       if (!slotRempli(bloc.photo)) erreurs.push(`Bloc n°${i + 1} : la photo n'est pas choisie.`);
     });
+    // Une requête ne peut pas contenir plus de NOUVELLES_PHOTOS_MAX fichiers :
+    // au-delà, PHP en ignore sans prévenir. On préfère le dire clairement.
+    const nouvelles = [state.hero, ...state.galerie, ...state.blocs.map((b) => b.photo)]
+      .filter((slot) => slot && slot.file).length;
+    if (nouvelles > NOUVELLES_PHOTOS_MAX) {
+      erreurs.push(`${nouvelles} nouvelles photos à envoyer : le serveur en accepte ${NOUVELLES_PHOTOS_MAX} au maximum par enregistrement. Enregistre l'article maintenant, puis rouvre-le avec « Modifier l'article » pour ajouter les autres.`);
+    }
     return erreurs;
   }
 
@@ -457,16 +467,107 @@
     }
   }
 
+  /* --- Galerie : glisser-déposer de plusieurs photos ou d'un dossier ------ */
+  const FORMAT_IMAGE = /^image\/(jpeg|png|webp|gif)$/;
+  const EXT_IMAGE = /\.(jpe?g|png|webp|gif)$/i;
+  function estImage(file) {
+    return FORMAT_IMAGE.test(file.type) || EXT_IMAGE.test(file.name);
+  }
+
+  // Lit une entrée déposée (fichier ou dossier, sous-dossiers compris) et
+  // renvoie la liste des fichiers qu'elle contient. Un dossier se lit par
+  // paquets : readEntries() est rappelée jusqu'à ce qu'elle renvoie une liste vide.
+  function lireEntree(entree) {
+    if (entree.isFile) {
+      return new Promise((ok) => entree.file((f) => ok([f]), () => ok([])));
+    }
+    if (!entree.isDirectory) return Promise.resolve([]);
+    const lecteur = entree.createReader();
+    const fichiers = [];
+    const lireUnPaquet = () => new Promise((ok) => {
+      lecteur.readEntries(async (paquet) => {
+        if (!paquet.length) return ok(fichiers);
+        for (const e of paquet) fichiers.push(...(await lireEntree(e)));
+        ok(lireUnPaquet());
+      }, () => ok(fichiers));
+    });
+    return lireUnPaquet();
+  }
+
+  function messageDepot(texte, type) {
+    dropMsg.textContent = texte;
+    dropMsg.className = `status-line ${type ? `is-${type}` : ''}`.trim();
+  }
+
+  // Range les photos dans la galerie : d'abord les emplacements vides, puis
+  // de nouveaux emplacements (sans limite). Les photos déjà en place ne
+  // sont jamais remplacées. L'ordre suit les noms de fichiers (IMG_2 avant IMG_10).
+  function ajouterPhotosGalerie(fichiers) {
+    if (!state) return;
+    const images = fichiers.filter(estImage);
+    images.sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
+
+    let ajoutees = 0;
+    for (const f of images) {
+      let slot = state.galerie.find((s) => !slotRempli(s));
+      if (!slot) {
+        slot = slotVide();
+        state.galerie.push(slot);
+      }
+      choisirFichier(slot, f);
+      ajoutees++;
+    }
+    renderAll();
+
+    const notes = [];
+    if (ajoutees) notes.push(`${ajoutees} photo${ajoutees > 1 ? 's' : ''} ajoutée${ajoutees > 1 ? 's' : ''}.`);
+    const pasImages = fichiers.length - images.length;
+    if (pasImages) notes.push(`${pasImages} fichier${pasImages > 1 ? 's' : ''} ignoré${pasImages > 1 ? 's' : ''} (seuls JPG, PNG, WebP et GIF sont acceptés).`);
+    if (!fichiers.length) notes.push('Aucun fichier reçu.');
+    messageDepot(notes.join(' '), ajoutees && !pasImages ? 'success' : 'error');
+  }
+
   /* --- Branchements ------------------------------------------------------ */
   titreInput.addEventListener('input', () => { if (state) state.titre = titreInput.value; });
   introInput.addEventListener('input', () => { if (state) state.intro = introInput.value; });
 
   galerieAddBtn.addEventListener('click', () => {
-    if (state && state.galerie.length < GALERIE_MAX) {
+    if (state) {
       state.galerie.push(slotVide());
       renderAll();
     }
   });
+  // Zone de dépôt : glisser des fichiers / un dossier, ou cliquer pour choisir
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('is-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('is-over'));
+  dropZone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('is-over');
+    // À lire AVANT tout « await » : après, le navigateur vide les données déposées.
+    const entrees = [...e.dataTransfer.items]
+      .map((item) => (item.webkitGetAsEntry ? item.webkitGetAsEntry() : null))
+      .filter(Boolean);
+    const fichiersDirects = [...e.dataTransfer.files];
+    const fichiers = entrees.length
+      ? (await Promise.all(entrees.map(lireEntree))).flat()
+      : fichiersDirects;
+    ajouterPhotosGalerie(fichiers);
+  });
+  dropZone.addEventListener('click', () => dropInput.click());
+  dropZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      dropInput.click();
+    }
+  });
+  dropInput.addEventListener('change', () => {
+    ajouterPhotosGalerie([...dropInput.files]);
+    dropInput.value = ''; // permet de re-choisir les mêmes fichiers ensuite
+  });
+
   blocAddBtn.addEventListener('click', () => {
     if (state && state.blocs.length < BLOCS_MAX) {
       state.blocs.push({ texte: '', photo: slotVide() });
@@ -479,4 +580,6 @@
 
   // admin.js appelle cette fonction depuis la liste des voyages
   window.openArticleEditor = ouvrir;
+  // admin-voyage.js réutilise la même réduction de photo avant envoi
+  window.reduirePhotoAdmin = reduirePhoto;
 })();

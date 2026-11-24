@@ -222,7 +222,17 @@
   // d'écran) et pour sa copie affichée sur mobile (.step-display).
   function buildStepBody(voyage, sectionData, index) {
     const h2 = document.createElement('h2');
-    h2.textContent = sectionData.titre;
+    // Le nom du pays (premier texte) mène à son article, s'il existe.
+    if (index === 0 && voyage.article) {
+      const lien = document.createElement('a');
+      lien.className = 'titre-lien';
+      lien.href = `pays.html?id=${encodeURIComponent(voyage.id)}`;
+      lien.textContent = sectionData.titre;
+      lien.title = `Lire l'article : ${voyage.pays}`;
+      h2.appendChild(lien);
+    } else {
+      h2.textContent = sectionData.titre;
+    }
 
     const nodes = [h2];
 
@@ -407,8 +417,8 @@
     // Couleurs claires (thème clair) : océan bleu-vert doux, terres crème.
     try {
       const mat = myGlobe.globeMaterial();
-      mat.color.set('#bfdad6');
-      mat.emissive.set('#a9cbc6');
+      mat.color.set('#7ab9df');
+      mat.emissive.set('#a9bbcb');
       mat.emissiveIntensity = 0.45;
     } catch (e) {}
 
@@ -443,7 +453,11 @@
     window.addEventListener('resize', resize);
 
     try {
-      myGlobe.pointOfView({ lat: 15, lng: 20, altitude: 1.8 }, 0);
+      // Sur mobile, caméra plus éloignée : globe 1/3 plus petit à l'écran
+      // (altitude 3.05 au lieu de 1.8, calculé pour que le diamètre
+      // affiché soit les 2/3 de celui d'avant).
+      const mobile = window.matchMedia('(max-width: 820px)').matches;
+      myGlobe.pointOfView({ lat: 15, lng: 20, altitude: mobile ? 3.05 : 1.8 }, 0);
     } catch (e) {}
 
     startGlobeRotation(myGlobe);

@@ -94,6 +94,17 @@ async function loadVoyageList() {
     const actions = document.createElement('div');
     actions.className = 'voyage-actions';
 
+    // Modifier le voyage (pays, texte, photos de la page d'accueil) : le
+    // formulaire vit dans admin-voyage.js (window.openVoyageEditor).
+    const voyageBtn = document.createElement('button');
+    voyageBtn.type = 'button';
+    voyageBtn.className = 'voyage-article-btn btn-secondary';
+    voyageBtn.textContent = 'Modifier le voyage';
+    voyageBtn.addEventListener('click', () => {
+      if (typeof window.openVoyageEditor === 'function') window.openVoyageEditor(voyage);
+    });
+    actions.appendChild(voyageBtn);
+
     // Article du pays : créer (pas encore d'article) ou modifier. L'éditeur
     // vit dans admin-article.js (window.openArticleEditor).
     const articleBtn = document.createElement('button');

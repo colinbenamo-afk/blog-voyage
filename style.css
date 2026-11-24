@@ -467,6 +467,18 @@ header .site-header-logo-img {
   color: var(--text);
 }
 
+/* Nom du pays cliquable (vers son article) : garde l'apparence du titre,
+   passe en orange au survol. */
+.titre-lien {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.titre-lien:hover,
+.titre-lien:focus-visible {
+  color: var(--primary);
+}
+
 /* Coordonnées GPS de chaque destination, en Space Mono pour un rendu
    façon "affichage technique" */
 .step p.coords,

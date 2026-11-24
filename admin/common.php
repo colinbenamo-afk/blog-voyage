@@ -49,8 +49,7 @@ define('ARTICLES_DIR', DATA_DIR . '/articles');
 define('ARTICLE_IMG_DIR', ROOT_DIR . '/assets/articles');
 
 // Limites de l'article (à modifier ici si le cahier des charges change)
-const GALERIE_MIN = 3;
-const GALERIE_MAX = 7;
+const GALERIE_MIN = 3;   // pas de maximum : la galerie peut contenir autant de photos qu'on veut
 const BLOCS_MAX = 20;
 
 function fail(array $errors, int $status = 400): void
