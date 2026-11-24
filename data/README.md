@@ -15,6 +15,8 @@ et `admin/delete-voyage.php` (suppression).
 - `annee` : année du voyage (nombre, ex : `2026`), sert au tri chronologique et à
   la frise de la page d'accueil. `null` si inconnue : le voyage est alors placé
   à la fin et n'apparaît pas dans la frise.
+- `mois` (facultatif) : mois du voyage, nombre de 1 à 12. Sert seulement à départager
+  deux voyages de la même année (les voyages s'affichent du plus récent au plus ancien).
 - `duree`, `transport` : texte libre.
 - `coordonnees` : `{ lat, lon }` en degrés décimaux (Sud et Ouest négatifs).
 - `photos` : 3 chemins d'images, un par étape. Un même chemin peut apparaître

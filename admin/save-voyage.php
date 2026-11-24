@@ -182,6 +182,12 @@ if ($annee === false || $annee === null) {
     $errors[] = "L'année du voyage doit être une année valide (ex : 2026).";
 }
 
+// Mois : facultatif (1 à 12), sert à départager deux voyages de la même année.
+$mois = filter_var($_POST['mois'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 12]]);
+if ($mois === false) {
+    $mois = null;
+}
+
 $lat = filter_var($_POST['lat'] ?? null, FILTER_VALIDATE_FLOAT);
 $lon = filter_var($_POST['lon'] ?? null, FILTER_VALIDATE_FLOAT);
 
@@ -279,6 +285,10 @@ $newVoyage = [
         ['titre' => trim((string) $_POST['moment2_titre']), 'texte' => trim((string) $_POST['moment2_texte'])],
     ],
 ];
+
+if ($mois !== null) {
+    $newVoyage['mois'] = $mois;
+}
 
 // On ajoute le nouveau voyage sans jamais toucher aux voyages existants.
 $voyages[] = $newVoyage;

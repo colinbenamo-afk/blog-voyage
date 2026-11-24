@@ -49,3 +49,11 @@
 - **Chemins de photos « conservées »** : `save-article.php` n'accepte un `keep` que s'il a exactement la forme `assets/articles/<id>/<nom>.webp` ET que le fichier existe — impossible de lui faire lire ou garder un autre fichier du site.
 - **L'id d'un article est celui du voyage** (`voyages.json`) : on ne peut pas créer d'article pour un pays qui n'existe pas encore. Il faut d'abord créer le voyage.
 - `save-voyage.php` et `delete-voyage.php` ont gardé leur propre copie du code commun (filet de sécurité JSON, `fail()`…) ; seuls les endpoints d'article utilisent `common.php`. À factoriser plus tard si besoin, pas urgent.
+
+## Envoi des photos par lots (24 nov)
+
+Quand un enregistrement d'article contient beaucoup de nouvelles photos (plus de 9), `admin-article.js` les envoie en plusieurs requêtes (`PHOTOS_PAR_ENVOI = 6` photos neuves par lot) au lieu d'un seul gros envoi, qui pouvait être coupé par `php -S` (« Failed to fetch »).
+
+- Le 1er lot contient la couverture, les blocs et de quoi faire 3 photos de galerie (minimum valide) ; les lots suivants ajoutent la galerie.
+- Les photos déjà sur le serveur sont toujours renvoyées avec leur chemin (`keep`) : sinon `save-article.php` les supprimerait en nettoyant les photos non utilisées.
+- En cas de panne en cours de route, les lots déjà enregistrés restent ; un nouveau clic sur « Enregistrer l'article » n'envoie que les photos restantes.

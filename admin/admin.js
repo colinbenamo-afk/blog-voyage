@@ -27,6 +27,7 @@ const accessKeyInput = document.getElementById('access-key');
 const paysInput = document.getElementById('pays');
 const idPreviewEl = document.getElementById('id-preview');
 const anneeInput = document.getElementById('annee');
+const moisSelect = document.getElementById('mois');
 const dureeInput = document.getElementById('duree');
 const transportSelect = document.getElementById('transport');
 const latInput = document.getElementById('lat');
@@ -198,6 +199,7 @@ function collectFormValues() {
     accessKey: accessKeyInput.value,
     pays: paysInput.value.trim(),
     annee: Number(anneeInput.value),
+    mois: moisSelect.value,   // facultatif : '' ou '1' à '12'
     duree: dureeInput.value.trim(),
     transport: transportSelect.value,
     lat: parseFloat(latInput.value),
@@ -267,6 +269,7 @@ form.addEventListener('submit', async (event) => {
   body.append('access_key', values.accessKey);
   body.append('pays', values.pays);
   body.append('annee', String(values.annee));
+  body.append('mois', values.mois);
   body.append('duree', values.duree);
   body.append('transport', values.transport);
   body.append('lat', String(values.lat));

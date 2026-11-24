@@ -19,7 +19,7 @@ Elle sert aussi à **classer les voyages par ordre chronologique automatiquement
 
 ### 1. L'année et le tri
 
-Chaque voyage a un champ `annee` (ex. `2025`) dans `data/voyages.json`. Au chargement, `sortByYear()` trie les voyages du plus ancien au plus récent. Tout le reste (sections, menu, globe, frise) utilise cette liste triée.
+Chaque voyage a un champ `annee` (ex. `2025`) dans `data/voyages.json`. Au chargement, `sortByYear()` trie les voyages du plus récent au plus ancien (depuis le 24 novembre ; champ `mois` facultatif pour départager une même année). Tout le reste (sections, menu, globe, frise) utilise cette liste triée.
 
 - `getAnnee()` lit `annee`. Si le champ manque (ancien fichier encore en ligne), elle reprend l'année de l'ancien champ `ordre_depart` (`"2026-..."`).
 - Un voyage sans année est placé à la fin et affiche « — » dans la frise.

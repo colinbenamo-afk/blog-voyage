@@ -79,6 +79,24 @@ requireAdminAuth();
         <input type="number" id="ve-annee" min="1900" max="2100" step="1">
       </div>
       <div class="field">
+        <label for="ve-mois">Mois (facultatif)</label>
+        <select id="ve-mois">
+          <option value="">Non précisé</option>
+          <option value="1">Janvier</option>
+          <option value="2">Février</option>
+          <option value="3">Mars</option>
+          <option value="4">Avril</option>
+          <option value="5">Mai</option>
+          <option value="6">Juin</option>
+          <option value="7">Juillet</option>
+          <option value="8">Août</option>
+          <option value="9">Septembre</option>
+          <option value="10">Octobre</option>
+          <option value="11">Novembre</option>
+          <option value="12">Décembre</option>
+        </select>
+      </div>
+      <div class="field">
         <label for="ve-duree">Durée</label>
         <input type="text" id="ve-duree" placeholder="ex : 6 semaines">
       </div>
@@ -223,6 +241,24 @@ requireAdminAuth();
       <div class="field">
         <label for="annee">Année du voyage</label>
         <input type="number" id="annee" name="annee" min="1900" max="2100" step="1" placeholder="ex : 2026" required>
+      </div>
+      <div class="field">
+        <label for="mois">Mois (facultatif, sert à classer deux voyages de la même année)</label>
+        <select id="mois" name="mois">
+          <option value="">Non précisé</option>
+          <option value="1">Janvier</option>
+          <option value="2">Février</option>
+          <option value="3">Mars</option>
+          <option value="4">Avril</option>
+          <option value="5">Mai</option>
+          <option value="6">Juin</option>
+          <option value="7">Juillet</option>
+          <option value="8">Août</option>
+          <option value="9">Septembre</option>
+          <option value="10">Octobre</option>
+          <option value="11">Novembre</option>
+          <option value="12">Décembre</option>
+        </select>
       </div>
       <div class="field">
         <label for="duree">Durée</label>

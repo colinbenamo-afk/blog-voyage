@@ -79,6 +79,12 @@ if ($annee === false || $annee === null) {
     $errors[] = "L'année du voyage doit être une année valide (ex : 2026).";
 }
 
+// Mois : facultatif (1 à 12). Vide = on retire le mois du voyage.
+$mois = filter_var($_POST['mois'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 12]]);
+if ($mois === false) {
+    $mois = null;
+}
+
 $lat = filter_var($_POST['lat'] ?? null, FILTER_VALIDATE_FLOAT);
 $lon = filter_var($_POST['lon'] ?? null, FILTER_VALIDATE_FLOAT);
 if ($lat === false || $lat === null || $lat < -90 || $lat > 90) {
@@ -138,6 +144,11 @@ $transport = $champ('transport');
 
 $v['pays'] = $pays;
 $v['annee'] = $annee;
+if ($mois !== null) {
+    $v['mois'] = $mois;
+} else {
+    unset($v['mois']);
+}
 $v['duree'] = $duree;
 $v['transport'] = $transport;
 $v['coordonnees'] = ['lat' => $lat, 'lon' => $lon];

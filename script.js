@@ -46,7 +46,7 @@
   const DATA_URL = 'data/voyages.json';
 
   /* --- Tri chronologique par année ---------------------------------- */
-  // Seule l'année compte (c'est tout ce que l'admin demande). Les voyages
+  // L'année compte (et le mois, s'il est renseigné). Les voyages
   // sans année sont envoyés à la fin. Le tri de JS est stable : deux
   // voyages de la même année gardent l'ordre dans lequel ils ont été
   // ajoutés.
@@ -60,9 +60,31 @@
     return match ? Number(match[1]) : null;
   }
 
+  // Mois facultatif (1 à 12) : sert seulement à départager deux voyages de la
+  // même année. Absent ou invalide = 0 (classé après les voyages datés de
+  // la même année).
+  function getMois(voyage) {
+    const mois = Number(voyage.mois);
+    return Number.isInteger(mois) && mois >= 1 && mois <= 12 ? mois : 0;
+  }
+
+  // Du plus RÉCENT au plus ancien (changé le 24 novembre ; avant : du plus
+  // ancien au plus récent). Clé de tri = année × 100 + mois (ex : mars 2026
+  // = 202603). Les voyages sans année restent à la fin, et deux voyages à
+  // égalité gardent l'ordre du fichier (le tri de JS est stable).
   function sortByYear(voyages) {
-    const rank = (voyage) => getAnnee(voyage) ?? Number.MAX_SAFE_INTEGER;
-    return [...voyages].sort((a, b) => rank(a) - rank(b));
+    const cle = (voyage) => {
+      const annee = getAnnee(voyage);
+      return annee === null ? null : annee * 100 + getMois(voyage);
+    };
+    return [...voyages].sort((a, b) => {
+      const ka = cle(a);
+      const kb = cle(b);
+      if (ka === null && kb === null) return 0;
+      if (ka === null) return 1;
+      if (kb === null) return -1;
+      return kb - ka;
+    });
   }
 
   /* --- Frise chronologique (bord gauche de la page) --------------------

@@ -17,7 +17,7 @@
   if (!panel) return;
 
   const champs = {
-    key: $('ve-key'), pays: $('ve-pays'), annee: $('ve-annee'), duree: $('ve-duree'),
+    key: $('ve-key'), pays: $('ve-pays'), annee: $('ve-annee'), mois: $('ve-mois'), duree: $('ve-duree'),
     transport: $('ve-transport'), lat: $('ve-lat'), lon: $('ve-lon'), intro: $('ve-intro'),
     m1titre: $('ve-m1-titre'), m1texte: $('ve-m1-texte'),
     m2titre: $('ve-m2-titre'), m2texte: $('ve-m2-texte'),
@@ -101,6 +101,7 @@
     idEl.textContent = v.id;
     champs.pays.value = v.pays || '';
     champs.annee.value = v.annee || '';
+    champs.mois.value = v.mois ? String(v.mois) : '';
     champs.duree.value = v.duree || '';
     champs.lat.value = v.coordonnees ? v.coordonnees.lat : '';
     champs.lon.value = v.coordonnees ? v.coordonnees.lon : '';
@@ -183,6 +184,7 @@
       body.append('id', voyage.id);
       body.append('pays', champs.pays.value);
       body.append('annee', champs.annee.value);
+      body.append('mois', champs.mois.value);
       body.append('duree', champs.duree.value);
       body.append('transport', champs.transport.value);
       body.append('lat', champs.lat.value);

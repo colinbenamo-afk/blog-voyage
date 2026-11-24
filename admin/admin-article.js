@@ -19,6 +19,7 @@
 
   const GALERIE_MIN = 3;
   const NOUVELLES_PHOTOS_MAX = 20; // PHP n'accepte par défaut que 20 fichiers par envoi (max_file_uploads)
+  const PHOTOS_PAR_ENVOI = 6;      // au-delà, les photos partent en plusieurs envois (un gros envoi peut être coupé par le serveur local)
   const BLOCS_MAX = 20;
   const PHOTOS_CDC = 8;        // minimum de photos demandé par le cahier des charges
   const ENVOI_MAX_COTE = 1600; // côté max (px) des photos avant envoi
@@ -326,12 +327,13 @@
       if (!bloc.texte.trim()) erreurs.push(`Bloc n°${i + 1} : le texte est obligatoire.`);
       if (!slotRempli(bloc.photo)) erreurs.push(`Bloc n°${i + 1} : la photo n'est pas choisie.`);
     });
-    // Une requête ne peut pas contenir plus de NOUVELLES_PHOTOS_MAX fichiers :
-    // au-delà, PHP en ignore sans prévenir. On préfère le dire clairement.
-    const nouvelles = [state.hero, ...state.galerie, ...state.blocs.map((b) => b.photo)]
-      .filter((slot) => slot && slot.file).length;
-    if (nouvelles > NOUVELLES_PHOTOS_MAX) {
-      erreurs.push(`${nouvelles} nouvelles photos à envoyer : le serveur en accepte ${NOUVELLES_PHOTOS_MAX} au maximum par enregistrement. Enregistre l'article maintenant, puis rouvre-le avec « Modifier l'article » pour ajouter les autres.`);
+    // Le 1er envoi contient la couverture, tous les blocs et 3 photos de galerie
+    // (le minimum pour que l'article soit valide) : il ne doit pas dépasser
+    // la limite de PHP (20 fichiers). Le reste de la galerie part par lots.
+    const nouvellesPremierEnvoi = [state.hero, ...state.blocs.map((b) => b.photo)]
+      .filter((slot) => slot && slot.file).length + GALERIE_MIN;
+    if (nouvellesPremierEnvoi > NOUVELLES_PHOTOS_MAX) {
+      erreurs.push(`Trop de nouvelles photos dans les blocs (${nouvellesPremierEnvoi - GALERIE_MIN}) : enregistre d'abord une partie des blocs, puis rouvre l'article pour ajouter les autres.`);
     }
     return erreurs;
   }
@@ -349,9 +351,43 @@
 
     saveBtn.disabled = true;
     deleteBtn.disabled = true;
-    setStatus('Préparation des photos…', null);
 
-    try {
+    // Emplacements qui portent une NOUVELLE photo (pas encore sur le serveur)
+    const neuves = () => [state.hero, ...state.galerie, ...state.blocs.map((b) => b.photo)].filter((s) => s.file);
+    const totalNeuves = neuves().length;
+    let envoyees = 0;
+
+    // Petit envoi : tout part d'un coup. Gros envoi : on découpe en lots. Le 1er
+    // lot contient la couverture + les blocs (+ de quoi faire 3 photos de galerie,
+    // le minimum valide), les lots suivants ajoutent PHOTOS_PAR_ENVOI photos neuves.
+    // `quota` = nombre de photos NEUVES de galerie autorisées dans le lot en cours.
+    const neuvesHeroBlocs = [state.hero, ...state.blocs.map((b) => b.photo)].filter((s) => s.file).length;
+    let quota = totalNeuves > PHOTOS_PAR_ENVOI + GALERIE_MIN
+      ? Math.max(0, PHOTOS_PAR_ENVOI - neuvesHeroBlocs)
+      : Infinity;
+
+    // Galerie du lot en cours. IMPORTANT : les photos DÉJÀ sur le serveur sont
+    // toujours incluses (sinon le serveur les supprimerait en nettoyant les
+    // photos qui ne sont plus utilisées) ; seules les photos neuves sont limitées.
+    function galerieDuLot() {
+      let reste = quota;
+      let lot = [];
+      for (;;) {
+        lot = [];
+        let r = reste;
+        for (const slot of state.galerie) {
+          if (!slot.file) lot.push(slot);
+          else if (r > 0) { lot.push(slot); r--; }
+        }
+        // L'article doit garder au moins GALERIE_MIN photos de galerie
+        if (lot.length >= GALERIE_MIN || lot.length === state.galerie.length) return lot;
+        reste++;
+      }
+    }
+
+    // Envoie UN lot (couverture, blocs, galerie du lot).
+    // Renvoie { ok: true } ou { ok: false, errors: [...] }. Lève une exception si le serveur est injoignable.
+    async function envoyerLot() {
       const body = new FormData();
       body.append('access_key', keyInput.value);
 
@@ -366,6 +402,8 @@
         return { keep: slot.keep };
       }
 
+      setStatus(totalNeuves ? `Préparation des photos… (${envoyees}/${totalNeuves} déjà enregistrées)` : 'Envoi au serveur…', null);
+      const galerieLot = galerieDuLot();
       const payload = {
         id: state.voyage.id,
         titre: state.titre.trim(),
@@ -374,28 +412,56 @@
         galerie: [],
         blocs: [],
       };
-      for (const slot of state.galerie) payload.galerie.push(await slotVersPayload(slot));
+      for (const slot of galerieLot) payload.galerie.push(await slotVersPayload(slot));
       for (const bloc of state.blocs) {
         payload.blocs.push({ texte: bloc.texte.trim(), photo: await slotVersPayload(bloc.photo) });
       }
       body.append('payload', JSON.stringify(payload));
 
-      setStatus(compteur ? `Envoi de ${compteur} photo${compteur > 1 ? 's' : ''} au serveur…` : 'Envoi au serveur…', null);
+      setStatus(compteur ? `Envoi de ${compteur} photo${compteur > 1 ? 's' : ''} au serveur… (${envoyees}/${totalNeuves} déjà enregistrées)` : 'Envoi au serveur…', null);
 
       const res = await fetch('save-article.php', { method: 'POST', body });
       let reponse;
       try {
         reponse = await res.json();
       } catch (err) {
-        showErrors([`Réponse inattendue du serveur (code ${res.status}). Les photos sont peut-être trop lourdes : enregistre l'article en plusieurs fois.`]);
-        setStatus('', null);
-        return;
+        return { ok: false, errors: [`Réponse inattendue du serveur (code ${res.status}).`] };
+      }
+      if (!res.ok || !reponse.success) {
+        return { ok: false, errors: reponse.errors || ["Erreur inconnue lors de l'enregistrement."] };
       }
 
-      if (!res.ok || !reponse.success) {
-        showErrors(reponse.errors || ["Erreur inconnue lors de l'enregistrement."]);
-        setStatus('', null);
-        return;
+      // Lot enregistré : on relit l'article pour connaître le chemin des photos
+      // qui viennent d'être envoyées, et on les marque « déjà sur le serveur ».
+      // Au prochain lot (ou au prochain clic après une panne), elles ne repartent pas.
+      const lu = await fetch(`../data/articles/${encodeURIComponent(state.voyage.id)}.json`, { cache: 'no-store' });
+      const art = await lu.json();
+      const marquer = (slot, chemin) => {
+        if (slot.file && chemin) {
+          libererSlot(slot);
+          delete slot.file;
+          delete slot.previewUrl;
+          slot.keep = chemin;
+          envoyees++;
+        }
+      };
+      marquer(state.hero, art.hero);
+      galerieLot.forEach((slot, i) => marquer(slot, art.galerie[i]));
+      state.blocs.forEach((bloc, i) => marquer(bloc.photo, art.blocs[i] && art.blocs[i].photo));
+      return { ok: true };
+    }
+
+    try {
+      for (;;) {
+        const lot = await envoyerLot();
+        if (!lot.ok) {
+          showErrors(envoyees ? [...lot.errors, `${envoyees} photo${envoyees > 1 ? 's' : ''} déjà enregistrée${envoyees > 1 ? 's' : ''} : clique de nouveau sur « Enregistrer l'article », seules les photos restantes seront envoyées.`] : lot.errors);
+          setStatus('', null);
+          if (envoyees) renderAll();
+          return;
+        }
+        if (!neuves().length) break;   // tout est envoyé
+        quota = PHOTOS_PAR_ENVOI;      // lots suivants : PHOTOS_PAR_ENVOI photos neuves chacun
       }
 
       // Succès : on recharge l'article depuis le serveur (les nouvelles photos
@@ -413,8 +479,12 @@
       );
       if (typeof loadVoyageList === 'function') await loadVoyageList();
     } catch (err) {
-      showErrors([`Impossible de contacter le serveur : ${err.message}`]);
+      showErrors([
+        `Impossible de contacter le serveur : ${err.message}`,
+        ...(envoyees ? [`${envoyees} photo${envoyees > 1 ? 's' : ''} déjà enregistrée${envoyees > 1 ? 's' : ''} : relance le serveur si besoin puis clique de nouveau sur « Enregistrer l'article », seules les photos restantes seront envoyées.`] : []),
+      ]);
       setStatus('', null);
+      if (envoyees) renderAll();
     } finally {
       saveBtn.disabled = false;
       deleteBtn.disabled = false;
